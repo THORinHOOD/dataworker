@@ -1,0 +1,57 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+}
+
+group = 'com.thorinhood'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+dependencies {
+	annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+
+//	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+//	compile group: 'org.springframework.social', name: 'spring-social-config', version: '2.0.0.M4'
+//	implementation 'org.springframework.social:spring-social-web:2.0.0.M4'
+	implementation "org.springframework.social:spring-social-web:+"
+//	implementation 'org.springframework.social:spring-social-config:2.0.0.M4'
+//	compile "org.springframework.social:spring-social-facebook:3.0.0.M3"
+	// Social networks API's
+	compile ('com.vk.api:sdk:0.5.12') {
+		exclude group: 'org.asynchttpclient', module: 'async-http-client'
+	}
+	implementation 'org.springframework.social:spring-social-twitter:+'
+	implementation 'org.springframework.social:spring-social-facebook:3.0.0.M3'
+
+	//hbase
+//	implementation 'org.apache.hbase.hbase-client:+'
+//	implementation 'org.apache.hbase.hbase:+'
+
+	//cassandra
+//	compile 'com.datastax.cassandra:cassandra-driver-core:2.1.9'
+	compile 'org.springframework.boot:spring-boot-starter-data-cassandra:+'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
