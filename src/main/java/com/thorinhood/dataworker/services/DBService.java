@@ -9,23 +9,14 @@ import java.util.Collection;
 @Service
 public class DBService {
 
-    private final MyColumnsRepo myColumnsRepo;
-
     private final VKTableRepo vkTableRepo;
 
-    public DBService(MyColumnsRepo myColumnsRepo,
-                     VKTableRepo vkTableRepo) {
-        this.myColumnsRepo = myColumnsRepo;
+    public DBService(VKTableRepo vkTableRepo) {
         this.vkTableRepo = vkTableRepo;
     }
 
     public void save(Collection<VKTable> vkTable) {
         vkTableRepo.saveAll(vkTable);
     }
-
-    public void saveRow(String id, String name) {
-        myColumnsRepo.save(new MyColumns(id, name));
-    }
-
 
 }
