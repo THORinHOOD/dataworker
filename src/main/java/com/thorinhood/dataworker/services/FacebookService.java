@@ -25,7 +25,4 @@ public class FacebookService implements SocialService<PersonInfo> {
         return null;
     }
 
-
-
-
 }

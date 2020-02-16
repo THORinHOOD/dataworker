@@ -1,8 +1,6 @@
 package com.thorinhood.dataworker.services;
 
-import com.thorinhood.dataworker.repositories.MyColumnsRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
-import com.thorinhood.dataworker.tables.MyColumns;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.stereotype.Service;
 
