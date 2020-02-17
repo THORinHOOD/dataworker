@@ -19,16 +19,17 @@ public class FacebookConfiguration {
     @Value("${facebook.access.token}")
     private String accessToken;
 
-    @Bean
-    public FacebookTemplate facebookTemplate() {
-        FacebookTemplate facebookTemplate = new FacebookTemplate(accessToken, null, appId, appSecret);
-        facebookTemplate.setApiVersion("5.0");
-        return facebookTemplate;
-    }
-
-    @Bean
-    public FacebookService facebookService(Facebook facebook) {
-        return new FacebookService(facebook);
-    }
+ //   @Bean
+//    public FacebookTemplate facebookTemplate() {
+//        FacebookTemplate facebookTemplate = new FacebookTemplate(accessToken, null, appId, appSecret);
+//        facebookTemplate.setApiVersion("5.0");
+//        return facebookTemplate;
+  //      return null;
+ //   }
+//
+//    @Bean
+//    public FacebookService facebookService(Facebook facebook) {
+//        return new FacebookService(facebook);
+//    }
 
 }

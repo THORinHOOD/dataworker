@@ -23,6 +23,9 @@ repositories {
 dependencies {
 	annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
+	compile 'org.springdoc:springdoc-openapi-core:1.1.44'
+	compile 'org.springdoc:springdoc-openapi-ui:1.1.44'
+
 //	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,7 +39,7 @@ dependencies {
 		exclude group: 'org.asynchttpclient', module: 'async-http-client'
 	}
 	implementation 'org.springframework.social:spring-social-twitter:+'
-	implementation 'org.springframework.social:spring-social-facebook:3.0.0.M3'
+	implementation 'org.springframework.social:spring-social-facebook:+'
 
 	//hbase
 //	implementation 'org.apache.hbase.hbase-client:+'

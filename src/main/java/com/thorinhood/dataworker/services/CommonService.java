@@ -4,10 +4,7 @@ import com.thorinhood.dataworker.configs.VKConfiguration;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.PersonInfo;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,23 +22,23 @@ public class CommonService {
 
     public CommonService(TwitterService twitterService,
                          VKService vkService,
-                         FacebookService facebookService,
+                         //FacebookService facebookService,
                          DBService dbService) {
         this.dbService = dbService;
         this.vkService = vkService;
         //      this.twitterService = twitterService;
     //    this.facebookService = facebookService;
 
-        Collection<String> userVKIds = List.of(
-            "135336811",
-            "53636214",
-            "210700286",
-            "172252308",
-            "218719153",
-            "151403319"
-        );
+//        Collection<String> userVKIds = List.of(
+//            "135336811",
+//            "53636214",
+//            "210700286",
+//            "172252308",
+//            "218719153",
+//            "151403319"
+//        );
 
-        List<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
+//        List<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
 //        Collection<String> twitterNames = extractTwitterNamesFromVk(vkResult);
 //        List<PersonInfo> twitterResult = twitterService.getDefaultUsersInfo(twitterNames);
 //        System.out.println(twitterResult);
@@ -52,7 +49,7 @@ public class CommonService {
 //                "4"
 //            "774387969744085"
 //        ));
-        dbService.save(vkResult);
+//        dbService.save(vkResult);
     }
 
     private Collection<String> extractTwitterNamesFromVk(List<PersonInfo> vkProfiles) {

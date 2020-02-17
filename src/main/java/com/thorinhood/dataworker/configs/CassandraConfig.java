@@ -23,6 +23,12 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Value("${cassandra.keyspace}")
     private String keySpace;
 
+    @Value("${cassandra.username}")
+    private String username;
+
+    @Value("${cassandra.password}")
+    private String password;
+
     @Override
     protected String getKeyspaceName() {
         return keySpace;
@@ -38,8 +44,8 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
         CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();
         cluster.setContactPoints(contactPoints);
         cluster.setPort(port);
-        cluster.setPassword("cassandra");
-        cluster.setUsername("cassandra");
+        cluster.setPassword(password);
+        cluster.setUsername(username);
         cluster.setMetricsEnabled(false);
         return cluster;
     }
