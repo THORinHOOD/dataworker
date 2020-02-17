@@ -32,4 +32,8 @@ public class DBService {
         return vkTableRepo.findById(idVk);
     }
 
+    public boolean containsVkUser(Integer id) {
+        return vkTableRepo.existsById(Long.valueOf(id));
+    }
+
 }

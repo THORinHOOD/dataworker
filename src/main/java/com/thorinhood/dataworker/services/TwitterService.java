@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.services;
 
+import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.utils.common.Extractor;
 import com.thorinhood.dataworker.utils.common.PersonInfo;
 import com.thorinhood.dataworker.utils.common.SocialService;
@@ -10,7 +11,7 @@ import org.springframework.social.twitter.api.TwitterProfile;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TwitterService implements SocialService<PersonInfo> {
+public class TwitterService implements SocialService<TwitterTable> {
 
     private Twitter twitter;
 
@@ -18,7 +19,7 @@ public class TwitterService implements SocialService<PersonInfo> {
         this.twitter = twitter;
     }
 
-    public List<PersonInfo> getDefaultUsersInfo(Collection<String> userScreenNames) {
+    public Collection<TwitterTable> getDefaultUsersInfo(Collection<String> userScreenNames) {
         List<TwitterUserPair> pairs = List.of(
             pair("screenName", TwitterProfile::getScreenName),
             pair("name", TwitterProfile::getName),
@@ -34,9 +35,9 @@ public class TwitterService implements SocialService<PersonInfo> {
         return getUsersInfo(pairs, userScreenNames);
     }
 
-    public List<PersonInfo> getUsersInfo(Collection<TwitterUserPair> pairs,
-                                                            Collection<String> userScreenNames,
-                                                            long... userIds) {
+    public List<TwitterTable> getUsersInfo(Collection<TwitterUserPair> pairs,
+                                         Collection<String> userScreenNames,
+                                         long... userIds) {
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
         if (userIds != null && userIds.length > 0) {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));

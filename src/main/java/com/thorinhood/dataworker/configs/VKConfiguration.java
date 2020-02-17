@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.configs;
 
+import com.thorinhood.dataworker.services.DBService;
 import com.thorinhood.dataworker.services.VKService;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
@@ -20,8 +21,8 @@ public class VKConfiguration {
     private Integer appId;
 
     @Bean
-    public VKService vkService() throws ClientException, ApiException {
-        return new VKService(serviceAccessKey, clientSecret, appId);
+    public VKService vkService(DBService dbService) throws ClientException, ApiException {
+        return new VKService(serviceAccessKey, clientSecret, appId, dbService);
     }
 
 }

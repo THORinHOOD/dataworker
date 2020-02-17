@@ -7,21 +7,26 @@ import com.thorinhood.dataworker.utils.vk.VKUserPair;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.ServiceActor;
+import com.vk.api.sdk.exceptions.ApiAccessException;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.ServiceClientCredentialsFlowResponse;
+import com.vk.api.sdk.objects.friends.responses.GetResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VKService implements SocialService<VKTable> {
 
@@ -29,10 +34,13 @@ public class VKService implements SocialService<VKTable> {
     private VkApiClient vk;
     private ServiceClientCredentialsFlowResponse authResponse;
     private ServiceActor serviceActor;
+    private DBService dbService;
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,
-                     Integer vkAppId) throws ClientException, ApiException {
+                     Integer vkAppId,
+                     DBService dbService) throws ClientException, ApiException {
+        this.dbService = dbService;
         transportClient = HttpTransportClient.getInstance();
         vk = new VkApiClient(transportClient);
         authResponse = vk.oauth()
@@ -41,7 +49,7 @@ public class VKService implements SocialService<VKTable> {
         serviceActor = new ServiceActor(vkAppId, vkClientSecret, vkServiceAccessKey);
     }
 
-    public List<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
+    public Collection<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
         List<VKUserPair> pairs = List.of(
                 pair("id", Integer.class, UserXtrCounters::getId, VKTable::setId),
                 pair(UserField.ABOUT, UserXtrCounters::getAbout, VKTable::setAbout),
@@ -96,6 +104,7 @@ public class VKService implements SocialService<VKTable> {
                 pairs,
                 Collections.singletonList(UserField.CONNECTIONS),
                 UsersNameCase.NOMINATIVE,
+                1,
                 userIds.toArray(new String[0])
             );
         } catch (ClientException | ApiException e) {
@@ -104,10 +113,15 @@ public class VKService implements SocialService<VKTable> {
         }
     }
 
-    public List<VKTable> getUsersInfo(Collection<VKUserPair> pairs,
+    public Collection<VKTable> getUsersInfo(Collection<VKUserPair> pairs,
                                       Collection<UserField> extra,
                                       UsersNameCase nameCase,
+                                      Integer depth,
                                       String... userIds) throws ClientException, ApiException {
+        String[] filteredUserIds = Stream.of(userIds)
+                .filter(id -> dbService.containsVkUser(Integer.valueOf(id)))
+                .toArray(String[]::new);
+
         List<UserField> fields = pairs.stream()
                 .map(VKUserPair::getUserField)
                 .filter(Objects::nonNull)
@@ -120,7 +134,7 @@ public class VKService implements SocialService<VKTable> {
                 .userIds(userIds)
                 .execute();
 
-        List<VKTable> result = users.stream()
+        Map<Integer, VKTable> result = users.stream()
                 .filter(Objects::nonNull)
                 .map(user -> {
                     VKTable vkTable = new VKTable();
@@ -129,10 +143,41 @@ public class VKService implements SocialService<VKTable> {
                         .forEach(pair -> pair.process(vkTable, user));
                     return vkTable;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
-        result.forEach(VKDataUtil::extractLinks);
-        return result;
+        result.values().forEach(VKDataUtil::extractLinks);
+
+        for (String id : userIds) {
+            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
+        }
+
+        List<VKTable> resultAll = new ArrayList<>(result.values());
+        if (depth > 0) {
+            for (VKTable vkTable : result.values()) {
+                resultAll.addAll(getUsersInfo(pairs, extra, nameCase, depth - 1, vkTable.getFriends().stream()
+                    .map(String::valueOf)
+                    .toArray(String[]::new)));
+            }
+        }
+
+        return resultAll;
+    }
+
+    private List<Integer> getUsersFriends(UsersNameCase nameCase, Integer userId) throws ClientException, ApiException {
+        GetResponse getResponse;
+        try {
+            getResponse = vk.friends().get(serviceActor)
+                    .nameCase(nameCase)
+                    .userId(userId)
+                    .execute();
+        } catch(ApiAccessException exception) {
+            return Collections.emptyList();
+        }
+
+        if (getResponse.getItems() != null) {
+            return getResponse.getItems();
+        }
+        return Collections.emptyList();
     }
 
     private VKUserPair<String> pair(String key, Function<UserXtrCounters, String> extractor,

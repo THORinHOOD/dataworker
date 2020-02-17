@@ -4,6 +4,8 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import java.util.List;
+
 @Table(value = "vk")
 public class VKTable {
 
@@ -57,6 +59,18 @@ public class VKTable {
 
     @Column
     private String instagram;
+
+    @Column
+    private List<Integer> friends;
+
+    public VKTable setFriends(List<Integer> friends) {
+        this.friends = friends;
+        return this;
+    }
+
+    public List<Integer> getFriends() {
+        return friends;
+    }
 
     public VKTable setId(Integer id) {
         this.id = id;

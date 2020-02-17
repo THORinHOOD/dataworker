@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface SocialService<TYPE> {
 
-    List<TYPE> getDefaultUsersInfo(Collection<String> ids);
+    Collection<TYPE> getDefaultUsersInfo(Collection<String> ids);
 
 }

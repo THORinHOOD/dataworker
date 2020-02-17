@@ -29,16 +29,16 @@ public class CommonService {
         //      this.twitterService = twitterService;
     //    this.facebookService = facebookService;
 
-//        Collection<String> userVKIds = List.of(
-//            "135336811",
-//            "53636214",
-//            "210700286",
-//            "172252308",
-//            "218719153",
-//            "151403319"
-//        );
+        Collection<String> userVKIds = List.of(
+            "135336811",
+            "53636214",
+            "210700286",
+            "172252308",
+            "218719153",
+            "151403319"
+        );
 
-//        List<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
+        Collection<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
 //        Collection<String> twitterNames = extractTwitterNamesFromVk(vkResult);
 //        List<PersonInfo> twitterResult = twitterService.getDefaultUsersInfo(twitterNames);
 //        System.out.println(twitterResult);
@@ -49,7 +49,7 @@ public class CommonService {
 //                "4"
 //            "774387969744085"
 //        ));
-//        dbService.save(vkResult);
+        dbService.save(vkResult);
     }
 
     private Collection<String> extractTwitterNamesFromVk(List<PersonInfo> vkProfiles) {

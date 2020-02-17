@@ -19,7 +19,7 @@ public class FacebookService implements SocialService<PersonInfo> {
     }
 
     @Override
-    public List<PersonInfo> getDefaultUsersInfo(Collection<String> ids) {
+    public Collection<PersonInfo> getDefaultUsersInfo(Collection<String> ids) {
 //        ArrayList<User> users = new ArrayList<>();
 //        String [] fields = {"id", "name"};
 //        ids.forEach(id -> users.add(facebook.fetchObject(id, User.class, fields)));
