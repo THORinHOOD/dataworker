@@ -2,8 +2,7 @@ package com.thorinhood.dataworker.controllers;
 
 import com.thorinhood.dataworker.services.DBService;
 import com.thorinhood.dataworker.tables.VKTable;
-import com.thorinhood.dataworker.utils.vk.VKSimpleInfoExtractor;
-import org.springframework.stereotype.Controller;
+import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +37,7 @@ public class SuggestLinksController {
                 return Collections.emptyMap();
             } else {
                 Map<String, String> assumptions = new HashMap<>();
-                VKSimpleInfoExtractor.getAllAssumptions(assumptions, vkTableOptional.get());
+                VKDataUtil.getAllAssumptions(assumptions, vkTableOptional.get());
                 return assumptions;
             }
         } else {

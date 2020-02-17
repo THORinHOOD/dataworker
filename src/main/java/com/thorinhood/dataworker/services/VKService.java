@@ -2,7 +2,7 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.SocialService;
-import com.thorinhood.dataworker.utils.vk.VKSimpleInfoExtractor;
+import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.thorinhood.dataworker.utils.vk.VKUserPair;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
@@ -131,7 +131,7 @@ public class VKService implements SocialService<VKTable> {
                 })
                 .collect(Collectors.toList());
 
-        result.forEach(VKSimpleInfoExtractor::extractLinks);
+        result.forEach(VKDataUtil::extractLinks);
         return result;
     }
 

@@ -10,16 +10,16 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class VKSimpleInfoExtractor {
+public class VKDataUtil {
 
     private final static String TWITTER = "://twitter.com/";
     private final static String FACEBOOK = "://www.facebook.com/";
     private final static String INSTAGRAM = "://instagram.com/";
 
     private final static Collection<BiConsumer<Map<String, String>, VKTable>> assumptionsSetters = Arrays.asList(
-            VKSimpleInfoExtractor::getFacebook,
-            VKSimpleInfoExtractor::getInstagram,
-            VKSimpleInfoExtractor::getTwitter
+            VKDataUtil::getFacebook,
+            VKDataUtil::getInstagram,
+            VKDataUtil::getTwitter
     );
 
     public static void extractLinks(VKTable vkTable) {
