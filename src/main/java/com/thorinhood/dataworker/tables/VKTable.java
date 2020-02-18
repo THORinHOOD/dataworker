@@ -6,7 +6,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.util.List;
 
-@Table(value = "vk")
+@Table("vk")
 public class VKTable {
 
     @PrimaryKey

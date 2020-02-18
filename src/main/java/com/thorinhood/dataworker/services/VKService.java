@@ -1,13 +1,12 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.common.SocialService;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
-import com.thorinhood.dataworker.utils.vk.VKUserPair;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.ServiceActor;
-import com.vk.api.sdk.exceptions.ApiAccessException;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
@@ -30,6 +29,7 @@ import java.util.stream.Stream;
 
 public class VKService implements SocialService<VKTable> {
 
+    private static final String USER_FIELD = "userField";
     private TransportClient transportClient;
     private VkApiClient vk;
     private ServiceClientCredentialsFlowResponse authResponse;
@@ -49,9 +49,13 @@ public class VKService implements SocialService<VKTable> {
         serviceActor = new ServiceActor(vkAppId, vkClientSecret, vkServiceAccessKey);
     }
 
+    public VkApiClient getVk() {
+        return vk;
+    }
+
     public Collection<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
-        List<VKUserPair> pairs = List.of(
-                pair("id", Integer.class, UserXtrCounters::getId, VKTable::setId),
+        List<FieldExtractor> pairs = List.of(
+                pair("id", UserXtrCounters::getId, VKTable::setId),
                 pair(UserField.ABOUT, UserXtrCounters::getAbout, VKTable::setAbout),
                 pair(UserField.PHOTO_50, UserXtrCounters::getPhoto50, VKTable::setPhoto50),
                 pair(UserField.SEX, x -> {
@@ -113,7 +117,7 @@ public class VKService implements SocialService<VKTable> {
         }
     }
 
-    public Collection<VKTable> getUsersInfo(Collection<VKUserPair> pairs,
+    public Collection<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
                                       Collection<UserField> extra,
                                       UsersNameCase nameCase,
                                       Integer depth,
@@ -123,7 +127,8 @@ public class VKService implements SocialService<VKTable> {
                 .toArray(String[]::new);
 
         List<UserField> fields = pairs.stream()
-                .map(VKUserPair::getUserField)
+                .filter(pair -> pair.containsAdditional(USER_FIELD))
+                .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         fields.addAll(extra);
@@ -140,7 +145,7 @@ public class VKService implements SocialService<VKTable> {
                     VKTable vkTable = new VKTable();
                     pairs.stream()
                         .filter(Objects::nonNull)
-                        .forEach(pair -> pair.process(vkTable, user));
+                        .forEach(pair -> pair.process(user, vkTable));
                     return vkTable;
                 })
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
@@ -170,7 +175,7 @@ public class VKService implements SocialService<VKTable> {
                     .nameCase(nameCase)
                     .userId(userId)
                     .execute();
-        } catch(ApiAccessException exception) {
+        } catch(Exception exception) {
             return Collections.emptyList();
         }
 
@@ -180,41 +185,22 @@ public class VKService implements SocialService<VKTable> {
         return Collections.emptyList();
     }
 
-    private VKUserPair<String> pair(String key, Function<UserXtrCounters, String> extractor,
-                                         BiConsumer<VKTable, String> setter) {
-        return VKUserPair.newBuilder(String.class)
-                .key(key)
-                .setter(setter)
-                .extractor(extractor)
+    private <TYPE> FieldExtractor<UserXtrCounters, VKTable, TYPE> pair(String key,
+                                             Function<UserXtrCounters, TYPE> extractor,
+                                             BiConsumer<VKTable, TYPE> setter) {
+        return FieldExtractor.<UserXtrCounters, VKTable, TYPE>newBuilder()
+                .setKey(key)
+                .setExtractor(extractor)
+                .setSetter(setter)
                 .build();
     }
 
-    private VKUserPair<String> pair(UserField userField, Function<UserXtrCounters, String> extractor,
-                                    BiConsumer<VKTable, String> setter) {
-        return VKUserPair.newBuilder(String.class)
-                .userField(userField)
-                .extractor(extractor)
-                .setter(setter)
-                .build();
-    }
-
-    private <TYPE> VKUserPair<TYPE> pair(String key, Class<TYPE> clazz, Function<UserXtrCounters, TYPE> extractor,
-                                    BiConsumer<VKTable, TYPE> setter) {
-        return VKUserPair.newBuilder(clazz)
-                .key(key)
-                .setter(setter)
-                .extractor(extractor)
-                .build();
-    }
-
-    private <TYPE> VKUserPair<TYPE> pair(UserField userField, Class<TYPE> clazz,
+    private <TYPE> FieldExtractor<UserXtrCounters, VKTable, TYPE> pair(UserField userField,
                                          Function<UserXtrCounters, TYPE> extractor,
                                          BiConsumer<VKTable, TYPE> setter) {
-        return VKUserPair.newBuilder(clazz)
-                .userField(userField)
-                .extractor(extractor)
-                .setter(setter)
-                .build();
+        FieldExtractor<UserXtrCounters, VKTable, TYPE> ext = pair(userField.getValue(), extractor, setter);
+        ext.addAdditional(USER_FIELD, userField);
+        return ext;
     }
 
 }

@@ -1,7 +1,10 @@
 package com.thorinhood.dataworker.services;
 
+import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
+import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.tables.VKTable;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -13,13 +16,23 @@ import java.util.Optional;
 public class DBService {
 
     private final VKTableRepo vkTableRepo;
+    private final TwitterTableRepo twitterTableRepo;
+    private final CassandraTemplate cassandraTemplate;
 
-    public DBService(VKTableRepo vkTableRepo) {
+    public DBService(VKTableRepo vkTableRepo,
+                     TwitterTableRepo twitterTableRepo,
+                     CassandraTemplate cassandraTemplate) {
         this.vkTableRepo = vkTableRepo;
+        this.cassandraTemplate = cassandraTemplate;
+        this.twitterTableRepo = twitterTableRepo;
     }
 
-    public void save(Collection<VKTable> vkTable) {
+    public void saveVK(Collection<VKTable> vkTable) {
         vkTableRepo.saveAll(vkTable);
+    }
+
+    public void saveTwitter(Collection<TwitterTable> twitterTables) {
+        twitterTableRepo.saveAll(twitterTables);
     }
 
     public Optional<VKTable> getVKById(String id) {
