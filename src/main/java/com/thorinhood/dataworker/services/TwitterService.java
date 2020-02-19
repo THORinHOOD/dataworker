@@ -6,7 +6,9 @@ import com.thorinhood.dataworker.utils.common.SocialService;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -19,6 +21,10 @@ public class TwitterService implements SocialService<TwitterTable> {
 
     public TwitterService(Twitter twitter) {
         this.twitter = twitter;
+    }
+
+    public Twitter getTwitter() {
+        return twitter;
     }
 
     public Collection<TwitterTable> getDefaultUsersInfo(Collection<String> userScreenNames) {
@@ -34,22 +40,41 @@ public class TwitterService implements SocialService<TwitterTable> {
             pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
         );
 
-        return getUsersInfo(pairs, userScreenNames);
+        return getUsersInfo(pairs, userScreenNames, 10);
     }
 
     public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                                            Collection<String> userScreenNames,
+                                           int depth,
                                            long... userIds) {
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
         if (userIds != null && userIds.length > 0) {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
         }
-        return twitterProfiles.stream()
+
+        HashSet<TwitterTable> result = new HashSet<>(convert(pairs, twitterProfiles));
+
+        while (depth > 0) {
+            for (String user : userScreenNames) {
+                try {
+                    result.addAll(convert(pairs, new ArrayList<>(twitter.friendOperations().getFriends(user))));
+                } catch (Exception exception) {
+
+                }
+            }
+            depth--;
+        }
+
+        return new ArrayList<>(result);
+    }
+
+    private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {
+        return profiles.stream()
                 .map(profile -> {
                     TwitterTable twitterTable = new TwitterTable();
                     pairs.stream()
-                        .filter(Objects::nonNull)
-                        .forEach(pair -> pair.process(profile, twitterTable));
+                            .filter(Objects::nonNull)
+                            .forEach(pair -> pair.process(profile, twitterTable));
                     return twitterTable;
                 })
                 .collect(Collectors.toList());

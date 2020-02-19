@@ -31,18 +31,21 @@ public class CommonService {
         this.twitterService = twitterService;
     //    this.facebookService = facebookService;
 
+       // twitterService.getTwitter().searchOperations().search("q");
+        int a = 5;
+
 
 //        twitterService.getDefaultUsersInfo(Collections.singletonList("k160rg"));
-        Collection<String> userVKIds = List.of(
-            "135336811",
-            "53636214",
-            "210700286",
-            "172252308",
-            "218719153",
-            "151403319"
-        );
+//        Collection<String> userVKIds = List.of(
+//            "135336811",
+//            "53636214",
+//            "210700286",
+//            "172252308",
+//            "218719153",
+//            "151403319"
+//        );
 //
-        Collection<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
+//        Collection<VKTable> vkResult = vkService.getDefaultUsersInfo(userVKIds);
 //        Collection<String> twitterNames = extractTwitterNamesFromVk(vkResult);
 //        List<PersonInfo> twitterResult = twitterService.getDefaultUsersInfo(twitterNames);
 //        System.out.println(twitterResult);
@@ -53,11 +56,20 @@ public class CommonService {
 //                "4"
 //            "774387969744085"
 //        ));
-        dbService.saveVK(vkResult);
-        Collection<TwitterTable> twitterResult = twitterService.getDefaultUsersInfo(vkResult.stream()
-                        .map(VKTable::getTwitter)
-                        .collect(Collectors.toList()));
-        dbService.saveTwitter(twitterResult);
+
+
+//        dbService.saveVK(vkResult);
+//        Collection<TwitterTable> twitterResult = twitterService.getDefaultUsersInfo(vkResult.stream()
+//                        .map(VKTable::getTwitter)
+//                        .collect(Collectors.toList()));
+//        Collection<String> twitterScreenNames = List.of(
+//                "EeOneGuy",
+//                "RealVolya",
+//                "yan_gordienko",
+//                "LindseyStirling",
+//                "k160rg"
+//        );
+//        dbService.saveTwitter(twitterService.getDefaultUsersInfo(twitterScreenNames));
 //        dbService.testCassandraTemplate("hello");
     }
 
