@@ -2,8 +2,8 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.repositories.VKIndexTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
-import com.thorinhood.dataworker.tables.VKIndexTable;
 import com.thorinhood.dataworker.tables.VKTable;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -15,21 +15,30 @@ public class VKDBService {
 
     private final VKTableRepo vkTableRepo;
     private final VKIndexTableRepo vkIndexTableRepo;
+    private final CassandraTemplate cassandraTemplate;
 
-    public VKDBService(VKTableRepo vkTableRepo, VKIndexTableRepo vkIndexTableRepo) {
+    public VKDBService(VKTableRepo vkTableRepo,
+                       VKIndexTableRepo vkIndexTableRepo,
+                       CassandraTemplate cassandraTemplate) {
         this.vkTableRepo = vkTableRepo;
         this.vkIndexTableRepo = vkIndexTableRepo;
+        this.cassandraTemplate = cassandraTemplate;
     }
 
-    public List<VKIndexTable> getAllIndicies() {
-        return vkIndexTableRepo.findAll();
+    public List<Integer> getAllIndexedPages() {
+        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM vk_indexed", Integer.class);
     }
 
     public List<Integer> getAllUnindexedPages() {
-        return vkIndexTableRepo.getUnindexed();
+        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM vk_unindexed", Integer.class);
     }
 
-    public void savePage(Collection<VKTable> vkTable) {
+    public List<Integer> getAllUnindexedFriendsPages() {
+        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM vk_unindexed_friends",
+                Integer.class);
+    }
+
+    public void savePages(Collection<VKTable> vkTable) {
         vkTableRepo.saveAll(vkTable);
     }
 

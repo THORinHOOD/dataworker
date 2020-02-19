@@ -1,6 +1,5 @@
 package com.thorinhood.dataworker.loaders;
 
-import com.thorinhood.dataworker.services.DBService;
 import com.thorinhood.dataworker.utils.common.SocialService;
 
 public abstract class CommonLoader<DB, DATA> {

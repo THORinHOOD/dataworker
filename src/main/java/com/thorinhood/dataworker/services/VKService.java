@@ -122,10 +122,6 @@ public class VKService implements SocialService<VKTable> {
                                       UsersNameCase nameCase,
                                       Integer depth,
                                       String... userIds) throws ClientException, ApiException {
-        String[] filteredUserIds = Stream.of(userIds)
-                .filter(id -> dbService.containsVKPage(Integer.valueOf(id)))
-                .toArray(String[]::new);
-
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -156,16 +152,16 @@ public class VKService implements SocialService<VKTable> {
             result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
         }
 
-        List<VKTable> resultAll = new ArrayList<>(result.values());
+      /*  List<VKTable> resultAll = new ArrayList<>(result.values());
         if (depth > 0) {
             for (VKTable vkTable : result.values()) {
                 resultAll.addAll(getUsersInfo(pairs, extra, nameCase, depth - 1, vkTable.getFriends().stream()
                     .map(String::valueOf)
                     .toArray(String[]::new)));
             }
-        }
+        }*/
 
-        return resultAll;
+        return result.values();
     }
 
     private List<Integer> getUsersFriends(UsersNameCase nameCase, Integer userId) throws ClientException, ApiException {

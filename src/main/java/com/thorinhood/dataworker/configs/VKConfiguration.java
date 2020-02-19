@@ -32,9 +32,8 @@ public class VKConfiguration {
 
     @Bean
     public VKLoader vkLoader(VKDBService dbService,
-                             VKService vkService,
-                             CassandraTemplate cassandraTemplate) {
-        return new VKLoader(dbService, vkService, cassandraTemplate);
+                             VKService vkService) {
+        return new VKLoader(dbService, vkService);
     }
 
 

@@ -4,15 +4,10 @@ import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.repositories.VKIndexTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.tables.TwitterTable;
-import com.thorinhood.dataworker.tables.VKIndexTable;
-import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DBService {
