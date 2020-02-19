@@ -34,12 +34,12 @@ public class VKService implements SocialService<VKTable> {
     private VkApiClient vk;
     private ServiceClientCredentialsFlowResponse authResponse;
     private ServiceActor serviceActor;
-    private DBService dbService;
+    private VKDBService dbService;
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,
                      Integer vkAppId,
-                     DBService dbService) throws ClientException, ApiException {
+                     VKDBService dbService) throws ClientException, ApiException {
         this.dbService = dbService;
         transportClient = HttpTransportClient.getInstance();
         vk = new VkApiClient(transportClient);
@@ -123,7 +123,7 @@ public class VKService implements SocialService<VKTable> {
                                       Integer depth,
                                       String... userIds) throws ClientException, ApiException {
         String[] filteredUserIds = Stream.of(userIds)
-                .filter(id -> dbService.containsVkUser(Integer.valueOf(id)))
+                .filter(id -> dbService.containsVKPage(Integer.valueOf(id)))
                 .toArray(String[]::new);
 
         List<UserField> fields = pairs.stream()
