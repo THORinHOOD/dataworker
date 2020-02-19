@@ -4,6 +4,7 @@ import com.thorinhood.dataworker.services.VKDBService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,16 +16,16 @@ public class VKLoader extends CommonLoader<VKDBService, VKTable> {
         super(dbService, vkService);
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 10000000)
     @Override
     void loadData() {
-        List<Integer> unindexedPages = dbService.getAllUnindexedPages(); // TODO GET BATCH
-        Collection<VKTable> users = service.getDefaultUsersInfo(unindexedPages.stream()
-                .map(String::valueOf)
-                .collect(Collectors.toList()));
-        dbService.savePages(users);
-
-
+        List<Integer> unindexedPages = dbService.getAllUnindexedPages();
+        if (!CollectionUtils.isEmpty(unindexedPages)) {
+            Collection<VKTable> users = service.getDefaultUsersInfo(unindexedPages.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.toList()));
+            dbService.savePages(users);
+        }
     }
 
 }

@@ -148,9 +148,9 @@ public class VKService implements SocialService<VKTable> {
 
         result.values().forEach(VKDataUtil::extractLinks);
 
-        for (String id : userIds) {
-            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
-        }
+//        for (String id : userIds) {
+//            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
+//        }
 
       /*  List<VKTable> resultAll = new ArrayList<>(result.values());
         if (depth > 0) {
