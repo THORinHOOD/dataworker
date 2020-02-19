@@ -32,7 +32,7 @@ public class CommonService {
     //    this.facebookService = facebookService;
 
        // twitterService.getTwitter().searchOperations().search("q");
-        int a = 5;
+//        int a = 5;
 
 
 //        twitterService.getDefaultUsersInfo(Collections.singletonList("k160rg"));
