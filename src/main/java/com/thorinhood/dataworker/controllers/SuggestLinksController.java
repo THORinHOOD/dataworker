@@ -1,6 +1,6 @@
 package com.thorinhood.dataworker.controllers;
 
-import com.thorinhood.dataworker.services.VKDBService;
+import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,13 +24,13 @@ public class SuggestLinksController {
     }
 
     @GetMapping("/vk")
-    public VKTable getVKUser(@RequestParam String id) {
+    public VKTable getVKUser(@RequestParam Long id) {
         return dbService.getPageById(id).orElse(null);
     }
 
     @GetMapping("/assumptions")
     public Map<String, String> getAssumptions(@RequestParam String socialNetwork,
-                                              @RequestParam String id) {
+                                              @RequestParam Long id) {
         if (socialNetwork.equalsIgnoreCase("vk")) {
             Optional<VKTable> vkTableOptional = dbService.getPageById(id);
             if (vkTableOptional.isEmpty()) {

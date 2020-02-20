@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.services;
 
+import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.common.SocialService;
@@ -16,7 +17,6 @@ import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class VKService implements SocialService<VKTable> {
 
@@ -55,7 +54,7 @@ public class VKService implements SocialService<VKTable> {
 
     public Collection<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
         List<FieldExtractor> pairs = List.of(
-                pair("id", UserXtrCounters::getId, VKTable::setId),
+                pair("id", UserXtrCounters::getId, (vk, x) -> vk.setId(Long.valueOf(x))),
                 pair(UserField.ABOUT, UserXtrCounters::getAbout, VKTable::setAbout),
                 pair(UserField.PHOTO_50, UserXtrCounters::getPhoto50, VKTable::setPhoto50),
                 pair(UserField.SEX, x -> {
@@ -135,7 +134,7 @@ public class VKService implements SocialService<VKTable> {
                 .userIds(userIds)
                 .execute();
 
-        Map<Integer, VKTable> result = users.stream()
+        Map<Long, VKTable> result = users.stream()
                 .filter(Objects::nonNull)
                 .map(user -> {
                     VKTable vkTable = new VKTable();

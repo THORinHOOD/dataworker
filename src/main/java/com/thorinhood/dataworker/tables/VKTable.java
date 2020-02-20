@@ -7,10 +7,10 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.List;
 
 @Table("vk")
-public class VKTable {
+public class VKTable implements HasId<Long> {
 
     @PrimaryKey
-    private Integer id;
+    private Long id;
 
     @Column
     private String about;
@@ -72,12 +72,12 @@ public class VKTable {
         return friends;
     }
 
-    public VKTable setId(Integer id) {
+    public VKTable setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -222,4 +222,10 @@ public class VKTable {
         this.instagram = instagram;
         return this;
     }
+
+    @Override
+    public Long id() {
+        return getId();
+    }
+
 }

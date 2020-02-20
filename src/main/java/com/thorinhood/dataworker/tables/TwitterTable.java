@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("twitter")
-public class TwitterTable {
+public class TwitterTable implements HasId<String> {
 
     @PrimaryKey
     private String screenName;
@@ -113,6 +113,11 @@ public class TwitterTable {
 
     public String getProfileImageUrl() {
         return profileImageUrl;
+    }
+
+    @Override
+    public String id() {
+        return getScreenName();
     }
 
 }
