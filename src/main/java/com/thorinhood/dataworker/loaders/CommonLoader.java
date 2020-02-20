@@ -2,7 +2,7 @@ package com.thorinhood.dataworker.loaders;
 
 import com.thorinhood.dataworker.services.db.DBService;
 import com.thorinhood.dataworker.tables.HasId;
-import com.thorinhood.dataworker.utils.common.SocialService;
+import com.thorinhood.dataworker.services.SocialService;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.util.CollectionUtils;
 

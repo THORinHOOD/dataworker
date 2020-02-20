@@ -2,7 +2,6 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
-import com.thorinhood.dataworker.utils.common.SocialService;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 

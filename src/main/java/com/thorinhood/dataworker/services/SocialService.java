@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.utils.common;
+package com.thorinhood.dataworker.services;
 
 import java.util.Collection;
 import java.util.List;

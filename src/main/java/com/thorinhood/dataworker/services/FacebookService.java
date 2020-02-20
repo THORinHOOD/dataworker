@@ -1,13 +1,8 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.utils.common.PersonInfo;
-import com.thorinhood.dataworker.utils.common.SocialService;
-import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class FacebookService implements SocialService<PersonInfo> {
 

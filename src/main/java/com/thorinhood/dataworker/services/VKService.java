@@ -3,7 +3,6 @@ package com.thorinhood.dataworker.services;
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
-import com.thorinhood.dataworker.utils.common.SocialService;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
