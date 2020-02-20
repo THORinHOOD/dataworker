@@ -14,19 +14,22 @@ public abstract class DBService<REPO extends CassandraRepository<TABLE, ID>, TAB
     protected final CassandraTemplate cassandraTemplate;
     protected final String unindexedTable;
     protected final String needFriendsTable;
+    protected final Class<ID> idClass;
 
     public DBService(REPO repo,
                      CassandraTemplate cassandraTemplate,
                      String unindexedTable,
-                     String needFriendsTable) {
+                     String needFriendsTable,
+                     Class<ID> idClass) {
         this.cassandraTemplate = cassandraTemplate;
         this.repo = repo;
         this.unindexedTable = unindexedTable;
         this.needFriendsTable = needFriendsTable;
+        this.idClass = idClass;
     }
 
-    protected List<ID> getAllUnindexedPages(Class<ID> clazz) {
-        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, clazz);
+    public List<ID> getAllUnindexedPages() {
+        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, idClass);
     }
 
     public void savePages(Collection<TABLE> tables) {
@@ -46,7 +49,5 @@ public abstract class DBService<REPO extends CassandraRepository<TABLE, ID>, TAB
     public boolean containsPage(ID id) {
         return repo.existsById(id);
     }
-
-    public abstract List<ID> getAllUnindexedPages();
 
 }
