@@ -33,12 +33,15 @@ public class VKService implements SocialService<VKTable> {
     private ServiceClientCredentialsFlowResponse authResponse;
     private ServiceActor serviceActor;
     private VKDBService dbService;
+    private VKFriendsService vkFriendsService;
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,
                      Integer vkAppId,
-                     VKDBService dbService) throws ClientException, ApiException {
+                     VKDBService dbService,
+                     VKFriendsService vkFriendsService) throws ClientException, ApiException {
         this.dbService = dbService;
+        this.vkFriendsService = vkFriendsService;
         transportClient = HttpTransportClient.getInstance();
         vk = new VkApiClient(transportClient);
         authResponse = vk.oauth()
@@ -53,6 +56,7 @@ public class VKService implements SocialService<VKTable> {
 
     public Collection<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
         List<FieldExtractor> pairs = List.of(
+                pair(UserField.DOMAIN, UserXtrCounters::getDomain, VKTable::setDomain),
                 pair("id", UserXtrCounters::getId, (vk, x) -> vk.setId(Long.valueOf(x))),
                 pair(UserField.ABOUT, UserXtrCounters::getAbout, VKTable::setAbout),
                 pair(UserField.PHOTO_50, UserXtrCounters::getPhoto50, VKTable::setPhoto50),
@@ -145,6 +149,14 @@ public class VKService implements SocialService<VKTable> {
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
         result.values().forEach(VKDataUtil::extractLinks);
+
+        for (VKTable vkTable : result.values()) {
+            try {
+                dbService.saveUnindexed(vkFriendsService.getFriends(String.valueOf(vkTable.getId())));
+            } catch(Exception exception) {
+                exception.printStackTrace();
+            }
+        }
 
 //        for (String id : userIds) {
 //            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));

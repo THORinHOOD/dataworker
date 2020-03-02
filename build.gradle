@@ -26,6 +26,8 @@ dependencies {
 	compile 'org.springdoc:springdoc-openapi-core:1.1.44'
 	compile 'org.springdoc:springdoc-openapi-ui:1.1.44'
 
+	compile 'org.jsoup:jsoup:1.13.1'
+
 //	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -46,7 +48,6 @@ dependencies {
 //	implementation 'org.apache.hbase.hbase:+'
 
 	//cassandra
-//	compile 'com.datastax.cassandra:cassandra-driver-core:2.1.9'
 	compile 'org.springframework.boot:spring-boot-starter-data-cassandra:+'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

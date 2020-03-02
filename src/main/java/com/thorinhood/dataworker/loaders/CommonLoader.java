@@ -1,8 +1,8 @@
 package com.thorinhood.dataworker.loaders;
 
+import com.thorinhood.dataworker.services.SocialService;
 import com.thorinhood.dataworker.services.db.DBService;
 import com.thorinhood.dataworker.tables.HasId;
-import com.thorinhood.dataworker.services.SocialService;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.util.CollectionUtils;
 
@@ -10,9 +10,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class CommonLoader<DB extends DBService<REPO, TABLE, ID>,
-                                   REPO extends CassandraRepository<TABLE, ID>,
-                                   TABLE extends HasId<ID>, ID> {
+public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID>,
+                                   TABLEREPO extends CassandraRepository<TABLE, ID>,
+                                   UNTABLEREPO extends CassandraRepository<UNTABLE, ID>,
+                                   TABLE extends HasId<ID>,
+                                   UNTABLE extends HasId<ID>,
+                                   ID> {
 
     protected final DB dbService;
     protected final SocialService<TABLE> service;

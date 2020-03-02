@@ -63,6 +63,18 @@ public class VKTable implements HasId<Long> {
     @Column
     private List<Integer> friends;
 
+    @Column
+    private String domain;
+
+    public VKTable setDomain(String domain) {
+        this.domain = domain;
+        return this;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
     public VKTable setFriends(List<Integer> friends) {
         this.friends = friends;
         return this;

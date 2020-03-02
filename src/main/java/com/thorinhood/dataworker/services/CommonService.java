@@ -2,6 +2,8 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.configs.VKConfiguration;
 import com.thorinhood.dataworker.services.db.DBService;
+import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.services.parser.VKParser;
 import com.thorinhood.dataworker.utils.common.PersonInfo;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
@@ -20,11 +22,15 @@ public class CommonService {
 //    private final FacebookService facebookService;
 
     public CommonService(TwitterService twitterService,
-                         VKService vkService) {
+                         VKService vkService,
+                         VKDBService vkdbService) {
                          //FacebookService facebookService,
                          //DBService dbService) {
         this.vkService = vkService;
         this.twitterService = twitterService;
+
+        VKParser vkParser = new VKParser(vkdbService);
+        vkParser.getFriends(135336811L);
     //    this.facebookService = facebookService;
 
        // twitterService.getTwitter().searchOperations().search("q");
