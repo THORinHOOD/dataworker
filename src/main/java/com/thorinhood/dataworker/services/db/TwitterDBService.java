@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TwitterDBService extends DBService<TwitterTableRepo, TwitterUnindexedTableRepo, TwitterTable,
-        TwitterUnindexedTable, String> {
+        TwitterUnindexedTable, String, String> {
 
     public TwitterDBService(TwitterTableRepo twitterTableRepo,
                             TwitterUnindexedTableRepo twitterUnindexedTableRepo,
@@ -20,6 +20,7 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterUnindex
                 cassandraTemplate,
                 "twitter_unindexed",
                 "twitter_need_friends",
+                String.class,
                 String.class
         );
     }

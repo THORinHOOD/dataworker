@@ -8,7 +8,7 @@ import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long> {
+public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long, String> {
 
     public VKDBService(VKTableRepo vkTableRepo,
                        VKUnindexedTableRepo vkUnindexedTableRepo,
@@ -19,7 +19,8 @@ public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VK
                 cassandraTemplate,
                 "vk_unindexed",
                 "vk_need_friends",
-                Long.class
+                Long.class,
+                String.class
         );
     }
 

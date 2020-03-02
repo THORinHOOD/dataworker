@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID>,
+public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID, UNID>,
                                    TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                   UNTABLEREPO extends CassandraRepository<UNTABLE, ID>,
+                                   UNTABLEREPO extends CassandraRepository<UNTABLE, UNID>,
                                    TABLE extends HasId<ID>,
-                                   UNTABLE extends HasId<ID>,
-                                   ID> {
+                                   UNTABLE extends HasId<UNID>,
+                                   ID, UNID> {
 
     protected final DB dbService;
     protected final SocialService<TABLE> service;
@@ -26,7 +26,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
     }
 
     public void loadData() {
-        List<ID> unindexedPages = dbService.getAllUnindexedPages();
+        List<UNID> unindexedPages = dbService.getAllUnindexedPages();
         if (!CollectionUtils.isEmpty(unindexedPages)) {
             Collection<TABLE> users = service.getDefaultUsersInfo(unindexedPages.stream()
                     .map(String::valueOf)

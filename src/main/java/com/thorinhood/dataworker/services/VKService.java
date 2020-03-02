@@ -2,6 +2,7 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.VKUnindexedTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
@@ -151,12 +152,20 @@ public class VKService implements SocialService<VKTable> {
         result.values().forEach(VKDataUtil::extractLinks);
 
         for (VKTable vkTable : result.values()) {
+            Collection<VKUnindexedTable> friends = null;
             try {
-                dbService.saveUnindexed(vkFriendsService.getFriends(String.valueOf(vkTable.getId())));
+                friends = vkFriendsService.getFriends(String.valueOf(vkTable.getId()));
+                dbService.saveUnindexed(friends);
             } catch(Exception exception) {
                 exception.printStackTrace();
             }
+            if (depth > 0 && friends != null && friends.size() != 0) {
+                result.putAll(getUsersInfo(pairs, extra, nameCase, depth - 1, friends.stream().map(VKUnindexedTable::getId).toArray(String[]::new))
+                    .stream()
+                    .collect(Collectors.toMap(VKTable::getId, Function.identity())));
+            }
         }
+
 
 //        for (String id : userIds) {
 //            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));

@@ -11,10 +11,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                UNINDEXEDREPO extends CassandraRepository<UNTABLE, ID>,
+                                UNINDEXEDREPO extends CassandraRepository<UNTABLE, UNID>,
                                 TABLE extends HasId<ID>,
-                                UNTABLE extends HasId<ID>,
-                                ID> {
+                                UNTABLE extends HasId<UNID>,
+                                ID, UNID> {
 
     protected final TABLEREPO tableRepo;
     protected final UNINDEXEDREPO unindexedRepo;
@@ -22,27 +22,32 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final String unindexedTable;
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
+    protected final Class<UNID> unidClass;
 
     public DBService(TABLEREPO tableRepo,
                      UNINDEXEDREPO unindexedRepo,
                      CassandraTemplate cassandraTemplate,
                      String unindexedTable,
                      String needFriendsTable,
-                     Class<ID> idClass) {
+                     Class<ID> idClass,
+                     Class<UNID> unidClass) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
         this.unindexedRepo = unindexedRepo;
         this.needFriendsTable = needFriendsTable;
         this.idClass = idClass;
+        this.unidClass = unidClass;
     }
 
-    public List<ID> getAllUnindexedPages() {
-        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, idClass);
+    public List<UNID> getAllUnindexedPages() {
+        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, unidClass);
     }
 
     public void savePages(Collection<TABLE> tables) {
-        tableRepo.saveAll(tables);
+        tableRepo.saveAll(tables.stream()
+                .filter(table -> !tableRepo.existsById(table.id()))
+                .collect(Collectors.toList()));
         String deleteUnindexed = "DELETE FROM " + unindexedTable + " WHERE id = ?";
        // String insertNeedFriends = "INSERT INTO " + needFriendsTable + " (id) VALUES (?)";
         tables.forEach(table -> {
@@ -53,7 +58,6 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 
     public void saveUnindexed(Collection<UNTABLE> ids) {
         unindexedRepo.saveAll(ids.stream()
-                .filter(untable -> !tableRepo.existsById(untable.id()))
                 .filter(untable -> !unindexedRepo.existsById(untable.id()))
                 .collect(Collectors.toList()));
     }

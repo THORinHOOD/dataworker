@@ -9,7 +9,7 @@ import com.thorinhood.dataworker.tables.TwitterUnindexedTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public class TwitterLoader extends CommonLoader<TwitterDBService, TwitterTableRepo, TwitterUnindexedTableRepo,
-        TwitterTable, TwitterUnindexedTable, String> {
+        TwitterTable, TwitterUnindexedTable, String, String> {
 
     public TwitterLoader(TwitterDBService dbService, TwitterService twitterService) {
         super(dbService, twitterService);

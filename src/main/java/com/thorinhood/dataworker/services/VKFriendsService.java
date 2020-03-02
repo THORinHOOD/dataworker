@@ -2,21 +2,25 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKUnindexedTable;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Iterator;
 
 public class VKFriendsService {
-    private static final String pattern = "https://vklist.ru/user/uid%s/friends";
     private static final String vkfaces = "https://vkfaces.com/api/vk-user/friends";
 
     private final VKDBService vkdbService;
@@ -27,34 +31,31 @@ public class VKFriendsService {
         restTemplate = new RestTemplate();
     }
 
-    public Collection<VKUnindexedTable> getFriends(String id) {
-        if (id == null) {
-            return Collections.emptyList();
-        }
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response
-                = restTemplate.getForEntity(String.format(pattern, id), String.class);
+    public Collection<VKUnindexedTable> getFriends(String id) throws ParseException {
+        Collection<VKUnindexedTable> result = new ArrayList<>();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
+        map.add("id", id);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(vkfaces, request , String.class);
         if (!response.getStatusCode().equals(HttpStatus.OK)) {
             return Collections.emptyList();
         }
-        return parse(response.getBody()).stream()
-                .map(Long::valueOf)
-                .map(VKUnindexedTable::new)
-                .collect(Collectors.toList());
-    }
 
-    private Collection<String> parse(String page) {
-        Collection<String> friends = new ArrayList<>();
-        Document doc = Jsoup.parse(page);
-        Elements friendsElements = doc.select(".user-common");
-        for (Element element : friendsElements) {
-            Elements elements = element.select("a.href");
-            String value = element.select("a").first().attr("href");
-            if (value != null && value.length() > 9) {
-                friends.add(value.substring(9));
-            }
+        JSONObject jo = (JSONObject) new JSONParser().parse(response.getBody());
+        JSONArray friends = (JSONArray) ((JSONObject) jo.get("response")).get("friends");
+        Iterator friendsItr = friends.iterator();
+        while (friendsItr.hasNext()) {
+            JSONObject friend = (JSONObject) friendsItr.next();
+            String domain = (String) friend.get("domain");
+            result.add(new VKUnindexedTable(domain));
         }
-        return friends;
+        return result;
     }
 
 }

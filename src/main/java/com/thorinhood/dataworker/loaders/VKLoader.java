@@ -8,7 +8,7 @@ import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.tables.VKUnindexedTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
-public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long> {
+public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long, String> {
 
     public VKLoader(VKDBService dbService, VKService vkService) {
         super(dbService, vkService);

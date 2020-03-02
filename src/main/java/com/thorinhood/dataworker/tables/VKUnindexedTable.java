@@ -4,26 +4,26 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("vk_unindexed")
-public class VKUnindexedTable implements HasId<Long> {
+public class VKUnindexedTable implements HasId<String> {
 
     @PrimaryKey
-    private Long id;
+    private String id;
 
-    public VKUnindexedTable(Long id) {
+    public VKUnindexedTable(String id) {
         this.id = id;
     }
 
-    public VKUnindexedTable setId(Long id) {
+    public VKUnindexedTable setId(String id) {
         this.id = id;
         return this;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
     @Override
-    public Long id() {
+    public String id() {
         return getId();
     }
 
