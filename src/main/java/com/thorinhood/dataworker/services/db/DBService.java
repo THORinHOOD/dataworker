@@ -5,9 +5,11 @@ import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.HasPagesLinks;
 import com.thorinhood.dataworker.tables.RelatedTable;
+import com.thorinhood.dataworker.utils.common.Finder;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +21,21 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                                 TABLE extends HasId<ID> & HasPagesLinks,
                                 UNTABLE extends HasId<UNID>,
                                 ID, UNID> {
+
+    private static RelatedTable execute(BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> finder,
+                                        RelatedTableRepo relatedTableRepo,
+                                        RelatedTable relatedTable,
+                                        Object value) {
+        return value != null ? finder.apply(relatedTableRepo, relatedTable) : null;
+    }
+
+    private static final Collection<BiFunction<RelatedTableRepo, RelatedTable, RelatedTable>> findExistFunctions = Arrays.asList(
+            (repo, table) -> Finder.findByLongValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
+            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkDomain, RelatedTableRepo::findByVkDomain),
+            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getTwitter, RelatedTableRepo::findByTwitter),
+            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getFacebook, RelatedTableRepo::findByFacebook),
+            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getInstagram, RelatedTableRepo::findByInstagram)
+    );
 
     protected final TABLEREPO tableRepo;
     protected final UNINDEXEDREPO unindexedRepo;
@@ -62,18 +79,28 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
          //   cassandraTemplate.getCqlOperations().execute(insertNeedFriends, table.id());
         });
 
-        relatedTableRepo.saveAll(convert(convert(tables), getFoundBy));
+        relatedTableRepo.saveAll(actualize(convert(tables)));
     }
 
-    public Collection<RelatedTable> convert(Collection<RelatedTable> tables,
-                                            BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
+    public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {
         return tables.stream()
-            .map(table -> getExists(table, getFoundBy))
+            .map(this::getExists)
             .collect(Collectors.toList());
     }
 
-    public RelatedTable getExists(RelatedTable toSave, BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
-        RelatedTable relatedTable = getFoundBy.apply(relatedTableRepo, toSave);
+    private RelatedTable getExistsRelatedTable(RelatedTable relatedTable) {
+        RelatedTable result = null;
+        for (BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> finder : findExistFunctions) {
+            result = finder.apply(relatedTableRepo, relatedTable);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    public RelatedTable getExists(RelatedTable toSave) {
+        RelatedTable relatedTable = getExistsRelatedTable(toSave);
         if (relatedTable == null) {
             return toSave;
         }
