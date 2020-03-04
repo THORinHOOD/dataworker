@@ -1,18 +1,22 @@
 package com.thorinhood.dataworker.services.db;
 
+import com.datastax.driver.core.utils.UUIDs;
+import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.HasId;
+import com.thorinhood.dataworker.tables.HasPagesLinks;
+import com.thorinhood.dataworker.tables.RelatedTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
                                 UNINDEXEDREPO extends CassandraRepository<UNTABLE, UNID>,
-                                TABLE extends HasId<ID>,
+                                TABLE extends HasId<ID> & HasPagesLinks,
                                 UNTABLE extends HasId<UNID>,
                                 ID, UNID> {
 
@@ -23,6 +27,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
     protected final Class<UNID> unidClass;
+    protected final RelatedTableRepo relatedTableRepo;
 
     public DBService(TABLEREPO tableRepo,
                      UNINDEXEDREPO unindexedRepo,
@@ -30,7 +35,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                      String unindexedTable,
                      String needFriendsTable,
                      Class<ID> idClass,
-                     Class<UNID> unidClass) {
+                     Class<UNID> unidClass,
+                     RelatedTableRepo relatedTableRepo) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
@@ -38,22 +44,57 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.needFriendsTable = needFriendsTable;
         this.idClass = idClass;
         this.unidClass = unidClass;
+        this.relatedTableRepo = relatedTableRepo;
     }
 
     public List<UNID> getAllUnindexedPages() {
         return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, unidClass);
     }
 
-    public void savePages(Collection<TABLE> tables) {
+    public void savePages(Collection<TABLE> tables, BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
         tableRepo.saveAll(tables.stream()
                 .filter(table -> !tableRepo.existsById(table.id()))
                 .collect(Collectors.toList()));
         String deleteUnindexed = "DELETE FROM " + unindexedTable + " WHERE id = ?";
        // String insertNeedFriends = "INSERT INTO " + needFriendsTable + " (id) VALUES (?)";
         tables.forEach(table -> {
-            cassandraTemplate.getCqlOperations().execute(deleteUnindexed, table.id());
+            cassandraTemplate.getCqlOperations().execute(deleteUnindexed, String.valueOf(table.id()));
          //   cassandraTemplate.getCqlOperations().execute(insertNeedFriends, table.id());
         });
+
+        relatedTableRepo.saveAll(convert(convert(tables), getFoundBy));
+    }
+
+    public Collection<RelatedTable> convert(Collection<RelatedTable> tables,
+                                            BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
+        return tables.stream()
+            .map(table -> getExists(table, getFoundBy))
+            .collect(Collectors.toList());
+    }
+
+    public RelatedTable getExists(RelatedTable toSave, BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
+        RelatedTable relatedTable = getFoundBy.apply(relatedTableRepo, toSave);
+        if (relatedTable == null) {
+            return toSave;
+        }
+        relatedTable.setFacebook(toSave.getFacebook());
+        relatedTable.setTwitter(toSave.getTwitter());
+        relatedTable.setFacebook(toSave.getFacebook());
+        relatedTable.setVkDomain(toSave.getVkDomain());
+        relatedTable.setVkId(toSave.getVkId());
+        return relatedTable;
+    }
+
+    protected Collection<RelatedTable> convert(Collection<TABLE> tables) {
+        return tables.stream()
+                .map(table -> new RelatedTable()
+                    .setUid(UUIDs.timeBased())
+                    .setTwitter(table.twitter())
+                    .setFacebook(table.facebook())
+                    .setInstagram(table.instagram())
+                    .setVkId(table.vkId())
+                    .setVkDomain(table.vkDomain()))
+                .collect(Collectors.toList());
     }
 
     public void saveUnindexed(Collection<UNTABLE> ids) {

@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.tables;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -7,7 +8,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.List;
 
 @Table("vk")
-public class VKTable implements HasId<Long> {
+public class VKTable implements HasId<Long>, HasPagesLinks {
 
     @PrimaryKey
     private Long id;
@@ -51,13 +52,13 @@ public class VKTable implements HasId<Long> {
     @Column
     private String country;
 
-    @Column
+    @Transient
     private String facebook;
 
-    @Column
+    @Transient
     private String twitter;
 
-    @Column
+    @Transient
     private String instagram;
 
     @Column
@@ -240,4 +241,28 @@ public class VKTable implements HasId<Long> {
         return getId();
     }
 
+    @Override
+    public Long vkId() {
+        return id;
+    }
+
+    @Override
+    public String vkDomain() {
+        return domain;
+    }
+
+    @Override
+    public String twitter() {
+        return twitter;
+    }
+
+    @Override
+    public String instagram() {
+        return instagram;
+    }
+
+    @Override
+    public String facebook() {
+        return facebook;
+    }
 }

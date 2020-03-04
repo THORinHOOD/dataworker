@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.services.db;
 
+import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterUnindexedTableRepo;
 import com.thorinhood.dataworker.tables.TwitterTable;
@@ -13,7 +14,8 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterUnindex
 
     public TwitterDBService(TwitterTableRepo twitterTableRepo,
                             TwitterUnindexedTableRepo twitterUnindexedTableRepo,
-                            CassandraTemplate cassandraTemplate) {
+                            CassandraTemplate cassandraTemplate,
+                            RelatedTableRepo relatedTableRepo) {
         super(
                 twitterTableRepo,
                 twitterUnindexedTableRepo,
@@ -21,7 +23,8 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterUnindex
                 "twitter_unindexed",
                 "twitter_need_friends",
                 String.class,
-                String.class
+                String.class,
+                relatedTableRepo
         );
     }
 

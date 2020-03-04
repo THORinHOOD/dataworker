@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("twitter")
-public class TwitterTable implements HasId<String> {
+public class TwitterTable implements HasId<String>, HasPagesLinks {
 
     @PrimaryKey
     private String screenName;
@@ -120,4 +120,28 @@ public class TwitterTable implements HasId<String> {
         return getScreenName();
     }
 
+    @Override
+    public Long vkId() {
+        return null;
+    }
+
+    @Override
+    public String vkDomain() {
+        return null;
+    }
+
+    @Override
+    public String twitter() {
+        return null;
+    }
+
+    @Override
+    public String instagram() {
+        return null;
+    }
+
+    @Override
+    public String facebook() {
+        return null;
+    }
 }

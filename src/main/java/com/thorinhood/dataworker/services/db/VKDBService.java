@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.services.db;
 
+import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.repositories.VKUnindexedTableRepo;
 import com.thorinhood.dataworker.tables.VKTable;
@@ -12,7 +13,8 @@ public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VK
 
     public VKDBService(VKTableRepo vkTableRepo,
                        VKUnindexedTableRepo vkUnindexedTableRepo,
-                       CassandraTemplate cassandraTemplate) {
+                       CassandraTemplate cassandraTemplate,
+                       RelatedTableRepo relatedTableRepo) {
         super(
                 vkTableRepo,
                 vkUnindexedTableRepo,
@@ -20,7 +22,8 @@ public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VK
                 "vk_unindexed",
                 "vk_need_friends",
                 Long.class,
-                String.class
+                String.class,
+                relatedTableRepo
         );
     }
 

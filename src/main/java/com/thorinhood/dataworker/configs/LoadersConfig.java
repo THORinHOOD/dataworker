@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.loaders.VKLoader;
+import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.services.db.VKDBService;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +14,9 @@ public class LoadersConfig {
 
     @Bean
     public VKLoader vkLoader(VKDBService dbService,
-                             VKService vkService) {
-        return new VKLoader(dbService, vkService);
+                             VKService vkService,
+                             RelatedTableRepo relatedTableRepo) {
+        return new VKLoader(dbService, vkService, relatedTableRepo);
     }
 
 }

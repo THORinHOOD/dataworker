@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.loaders;
 
+import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.repositories.VKUnindexedTableRepo;
 import com.thorinhood.dataworker.services.VKService;
@@ -10,14 +11,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long, String> {
 
-    public VKLoader(VKDBService dbService, VKService vkService) {
+    private RelatedTableRepo relatedTableRepo;
+
+    public VKLoader(VKDBService dbService, VKService vkService, RelatedTableRepo relatedTableRepo) {
         super(dbService, vkService);
+        this.relatedTableRepo = relatedTableRepo;
     }
 
     @Scheduled(fixedRate = 10000000)
-    @Override
     public void loadData() {
-        super.loadData();
+//        super.loadData();
+        loadData((relatedTableRepo, relatedTable) -> relatedTableRepo.findByVkId(relatedTable.getVkId()));
     }
 
 }

@@ -111,7 +111,7 @@ public class VKService implements SocialService<VKTable> {
                 pairs,
                 Collections.singletonList(UserField.CONNECTIONS),
                 UsersNameCase.NOMINATIVE,
-                1,
+                0,
                 userIds.toArray(new String[0])
             );
         } catch (ClientException | ApiException e) {
@@ -167,6 +167,7 @@ public class VKService implements SocialService<VKTable> {
         }
 
 
+
 //        for (String id : userIds) {
 //            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
 //        }
@@ -191,6 +192,7 @@ public class VKService implements SocialService<VKTable> {
                     .userId(userId)
                     .execute();
         } catch(Exception exception) {
+            exception.printStackTrace();
             return Collections.emptyList();
         }
 
