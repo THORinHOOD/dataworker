@@ -61,7 +61,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, unidClass);
     }
 
-    public void savePages(Collection<TABLE> tables, BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> getFoundBy) {
+    public void savePages(Collection<TABLE> tables) {
         tableRepo.saveAll(tables.stream()
                 .filter(table -> !tableRepo.existsById(table.id()))
                 .collect(Collectors.toList()));

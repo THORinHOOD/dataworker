@@ -20,8 +20,7 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexed
 
     @Scheduled(fixedRate = 10000000)
     public void loadData() {
-//        super.loadData();
-        loadData((relatedTableRepo, relatedTable) -> relatedTableRepo.findByVkId(relatedTable.getVkId()));
+        super.loadData();
     }
 
 }
