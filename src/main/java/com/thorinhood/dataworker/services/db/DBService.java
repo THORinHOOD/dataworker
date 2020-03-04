@@ -22,13 +22,6 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                                 UNTABLE extends HasId<UNID>,
                                 ID, UNID> {
 
-    private static RelatedTable execute(BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> finder,
-                                        RelatedTableRepo relatedTableRepo,
-                                        RelatedTable relatedTable,
-                                        Object value) {
-        return value != null ? finder.apply(relatedTableRepo, relatedTable) : null;
-    }
-
     private static final Collection<BiFunction<RelatedTableRepo, RelatedTable, RelatedTable>> findExistFunctions = Arrays.asList(
             (repo, table) -> Finder.findByLongValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
             (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkDomain, RelatedTableRepo::findByVkDomain),
