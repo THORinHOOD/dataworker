@@ -4,7 +4,9 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.HasPagesLinks;
+import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
+import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.Finder;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
@@ -13,12 +15,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
                                 UNINDEXEDREPO extends CassandraRepository<UNTABLE, UNID>,
-                                TABLE extends HasId<ID> & HasPagesLinks,
+                                TABLE extends Profile<ID>,
                                 UNTABLE extends HasId<UNID>,
                                 ID, UNID> {
 
@@ -61,18 +64,33 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, unidClass);
     }
 
-    public void savePages(Collection<TABLE> tables) {
-        tableRepo.saveAll(tables.stream()
-                .filter(table -> !tableRepo.existsById(table.id()))
-                .collect(Collectors.toList()));
-        String deleteUnindexed = "DELETE FROM " + unindexedTable + " WHERE id = ?";
-       // String insertNeedFriends = "INSERT INTO " + needFriendsTable + " (id) VALUES (?)";
-        tables.forEach(table -> {
-            cassandraTemplate.getCqlOperations().execute(deleteUnindexed, String.valueOf(table.id()));
-         //   cassandraTemplate.getCqlOperations().execute(insertNeedFriends, table.id());
-        });
+    public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {
+        int current = threads;
+        try {
+            while (current > 0) {
+                System.out.println("Waiting next batch...");
+                BatchProfiles<TABLE, ID> batchProfiles = queue.take();
+                if (batchProfiles.isEnd()) {
+                    current--;
+                    System.out.println(String.format("Current progress : %d/%d", threads - current, threads));
+                } else {
+                    Collection<TABLE> tables = batchProfiles.getProfiles();
+                    tableRepo.saveAll(tables.stream()
+                            .filter(table -> !tableRepo.existsById(table.id()))
+                            .collect(Collectors.toList()));
+                    relatedTableRepo.saveAll(actualize(convert(tables)));
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        relatedTableRepo.saveAll(actualize(convert(tables)));
+       // String deleteUnindexed = "DELETE FROM " + unindexedTable + " WHERE id = ?";
+       // String insertNeedFriends = "INSERT INTO " + needFriendsTable + " (id) VALUES (?)";
+        //tables.forEach(table -> {
+        //    cassandraTemplate.getCqlOperations().execute(deleteUnindexed, String.valueOf(table.id()));
+         //   cassandraTemplate.getCqlOperations().execute(insertNeedFriends, table.id());
+        //});
     }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {

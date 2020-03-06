@@ -1,20 +1,21 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.TwitterTable;
+import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TwitterService implements SocialService<TwitterTable> {
+public class TwitterService implements SocialService<TwitterTable, String> {
 
     private Twitter twitter;
 
@@ -26,7 +27,9 @@ public class TwitterService implements SocialService<TwitterTable> {
         return twitter;
     }
 
-    public Collection<TwitterTable> getDefaultUsersInfo(Collection<String> userScreenNames) {
+    @Override
+    public void getDefaultUsersInfo(Collection<String> userScreenNames,
+                                    BlockingQueue<BatchProfiles<TwitterTable, String>> queue) {
         List<FieldExtractor> pairs = List.of(
             pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
             pair("name", TwitterProfile::getName, TwitterTable::setName),
@@ -39,32 +42,42 @@ public class TwitterService implements SocialService<TwitterTable> {
             pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
         );
 
-        return getUsersInfo(pairs, userScreenNames, 10);
+        try {
+            getUsersInfo(pairs, userScreenNames, 0, queue);
+            queue.add(BatchProfiles.end());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
-                                           Collection<String> userScreenNames,
-                                           int depth,
-                                           long... userIds) {
+    public void getUsersInfo(Collection<FieldExtractor> pairs,
+                             Collection<String> userScreenNames,
+                             int depth,
+                             BlockingQueue<BatchProfiles<TwitterTable, String>> queue,
+                             long... userIds) throws InterruptedException {
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
         if (userIds != null && userIds.length > 0) {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
         }
 
         HashSet<TwitterTable> result = new HashSet<>(convert(pairs, twitterProfiles));
+        queue.put(BatchProfiles.next(result));
 
-        while (depth > 0) {
-            for (String user : userScreenNames) {
-                try {
-                    result.addAll(convert(pairs, new ArrayList<>(twitter.friendOperations().getFriends(user))));
-                } catch (Exception exception) {
+//        while (depth > 0) {
+//            getUsersInfo(
+//                pairs,
+//
+//            );
+////            for (String user : userScreenNames) {
+////                try {
+////                    result.addAll(convert(pairs, new ArrayList<>(twitter.friendOperations().getFriends(user))));
+////                } catch (Exception exception) {
+////
+////                }
+////            }
+////            depth--;
+//        }
 
-                }
-            }
-            depth--;
-        }
-
-        return new ArrayList<>(result);
     }
 
     private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {

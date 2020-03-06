@@ -8,7 +8,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.List;
 
 @Table("vk")
-public class VKTable implements HasId<Long>, HasPagesLinks {
+public class VKTable implements Profile<Long> {
 
     @PrimaryKey
     private Long id;
@@ -62,7 +62,7 @@ public class VKTable implements HasId<Long>, HasPagesLinks {
     private String instagram;
 
     @Column
-    private List<Integer> friends;
+    private List<String> friends;
 
     @Column
     private String domain;
@@ -76,12 +76,12 @@ public class VKTable implements HasId<Long>, HasPagesLinks {
         return domain;
     }
 
-    public VKTable setFriends(List<Integer> friends) {
+    public VKTable setFriends(List<String> friends) {
         this.friends = friends;
         return this;
     }
 
-    public List<Integer> getFriends() {
+    public List<String> getFriends() {
         return friends;
     }
 

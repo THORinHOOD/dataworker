@@ -1,11 +1,7 @@
 package com.thorinhood.dataworker.configs;
 
-import com.thorinhood.dataworker.services.FacebookService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.impl.FacebookTemplate;
 
 @Configuration
 public class FacebookConfiguration {

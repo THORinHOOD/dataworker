@@ -2,8 +2,9 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKTable;
-import com.thorinhood.dataworker.tables.VKUnindexedTable;
+import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
+import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
@@ -16,17 +17,29 @@ import com.vk.api.sdk.objects.friends.responses.GetResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
+import org.apache.commons.collections4.CollectionUtils;
+import org.json.simple.parser.ParseException;
+import org.springframework.data.util.Pair;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class VKService implements SocialService<VKTable> {
+public class VKService implements SocialService<VKTable, Long> {
 
     private static final String USER_FIELD = "userField";
     private TransportClient transportClient;
@@ -35,6 +48,7 @@ public class VKService implements SocialService<VKTable> {
     private ServiceActor serviceActor;
     private VKDBService dbService;
     private VKFriendsService vkFriendsService;
+    private ExecutorService executorService;
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,
@@ -49,13 +63,16 @@ public class VKService implements SocialService<VKTable> {
                 .serviceClientCredentialsFlow(vkAppId, vkClientSecret)
                 .execute();
         serviceActor = new ServiceActor(vkAppId, vkClientSecret, vkServiceAccessKey);
+        executorService = Executors.newFixedThreadPool(50);
     }
 
     public VkApiClient getVk() {
         return vk;
     }
 
-    public Collection<VKTable> getDefaultUsersInfo(Collection<String> userIds) {
+    @Override
+    public void getDefaultUsersInfo(Collection<Long> userIds,
+                                    BlockingQueue<BatchProfiles<VKTable, Long>> queue) {
         List<FieldExtractor> pairs = List.of(
                 pair(UserField.DOMAIN, UserXtrCounters::getDomain, VKTable::setDomain),
                 pair("id", UserXtrCounters::getId, (vk, x) -> vk.setId(Long.valueOf(x))),
@@ -107,24 +124,26 @@ public class VKService implements SocialService<VKTable> {
         );
 
         try {
-            return getUsersInfo(
+            getUsersInfo(
                 pairs,
                 Collections.singletonList(UserField.CONNECTIONS),
                 UsersNameCase.NOMINATIVE,
-                0,
-                userIds.toArray(new String[0])
+                10,
+                queue,
+                userIds.stream().map(String::valueOf).toArray(String[]::new)
             );
-        } catch (ClientException | ApiException e) {
+            queue.put(BatchProfiles.end());
+        } catch (ClientException | ApiException | InterruptedException e) {
             e.printStackTrace();
-            return Collections.emptyList();
         }
     }
 
-    public Collection<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
-                                      Collection<UserField> extra,
-                                      UsersNameCase nameCase,
-                                      Integer depth,
-                                      String... userIds) throws ClientException, ApiException {
+    public void getUsersInfo(Collection<FieldExtractor> pairs,
+                             Collection<UserField> extra,
+                             UsersNameCase nameCase,
+                             Integer depth,
+                             BlockingQueue<BatchProfiles<VKTable, Long>> queue,
+                             String... userIds) throws ClientException, ApiException {
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -150,38 +169,53 @@ public class VKService implements SocialService<VKTable> {
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
         result.values().forEach(VKDataUtil::extractLinks);
+        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
+        measureTimeUtil.start();
+        getUserFriends(result.values().stream().map(VKTable::getId).collect(Collectors.toList()))
+                .forEach(pair -> result.get(pair.getFirst()).setFriends(pair.getSecond()));
+        measureTimeUtil.end("It tooks %d");
 
-        for (VKTable vkTable : result.values()) {
-            Collection<VKUnindexedTable> friends = null;
-            try {
-                friends = vkFriendsService.getFriends(String.valueOf(vkTable.getId()));
-                dbService.saveUnindexed(friends);
-            } catch(Exception exception) {
-                exception.printStackTrace();
-            }
-            if (depth > 0 && friends != null && friends.size() != 0) {
-                result.putAll(getUsersInfo(pairs, extra, nameCase, depth - 1, friends.stream().map(VKUnindexedTable::getId).toArray(String[]::new))
-                    .stream()
-                    .collect(Collectors.toMap(VKTable::getId, Function.identity())));
-            }
+        try {
+            queue.put(BatchProfiles.next(result.values()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-
-
-//        for (String id : userIds) {
-//            result.get(Integer.valueOf(id)).setFriends(getUsersFriends(nameCase, Integer.valueOf(id)));
-//        }
-
-      /*  List<VKTable> resultAll = new ArrayList<>(result.values());
-        if (depth > 0) {
-            for (VKTable vkTable : result.values()) {
-                resultAll.addAll(getUsersInfo(pairs, extra, nameCase, depth - 1, vkTable.getFriends().stream()
-                    .map(String::valueOf)
-                    .toArray(String[]::new)));
+        for (VKTable vkTable : result.values()) {
+            Collection<String> friends = vkTable.getFriends();
+            if (depth > 0 && CollectionUtils.isNotEmpty(friends)) {
+               getUsersInfo(
+                   pairs,
+                   extra,
+                   nameCase,
+                   depth - 1,
+                   queue,
+                   friends.toArray(String[]::new)
+               );
             }
-        }*/
+        }
+    }
 
-        return result.values();
+    private List<Pair<Long, List<String>>> getUserFriends(Collection<Long> ids) {
+        try {
+            Collection<Callable<Pair<Long, List<String>>>> tasks = ids.stream()
+                    .map(id -> (Callable<Pair<Long, List<String>>>)
+                            () -> Pair.of(id, vkFriendsService.getFriends(String.valueOf(id))))
+                    .collect(Collectors.toList());
+            List<Future<Pair<Long, List<String>>>> futures = executorService.invokeAll(tasks);
+            List<Pair<Long, List<String>>> friendsPairs = new ArrayList<>();
+            for (Future<Pair<Long, List<String>>> future : futures) {
+                try {
+                    friendsPairs.add(future.get());
+                } catch(ExecutionException | InterruptedException exception) {
+                    exception.printStackTrace();
+                }
+            }
+            return friendsPairs;
+        } catch(InterruptedException exception) {
+            exception.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 
     private List<Integer> getUsersFriends(UsersNameCase nameCase, Integer userId) throws ClientException, ApiException {

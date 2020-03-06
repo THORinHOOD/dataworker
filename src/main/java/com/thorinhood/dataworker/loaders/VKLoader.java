@@ -9,6 +9,8 @@ import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.tables.VKUnindexedTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.Arrays;
+
 public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexedTableRepo, VKTable, VKUnindexedTable, Long, String> {
 
     private RelatedTableRepo relatedTableRepo;
@@ -20,7 +22,9 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexed
 
     @Scheduled(fixedRate = 10000000)
     public void loadData() {
-//        super.loadData();
+        super.loadData(Arrays.asList(
+            172252308L
+        ));
     }
 
 }

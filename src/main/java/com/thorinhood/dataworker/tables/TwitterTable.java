@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("twitter")
-public class TwitterTable implements HasId<String>, HasPagesLinks {
+public class TwitterTable implements Profile<String> {
 
     @PrimaryKey
     private String screenName;
