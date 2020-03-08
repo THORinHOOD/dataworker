@@ -25,11 +25,21 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - run: ls
-    - name: Copy single file to remote
-      uses: garygrossgarten/github-action-scp@release
+#     - name: Copy single file to remote
+#       uses: garygrossgarten/github-action-scp@release
+#       with:
+#         local: build/libs/dataworker-1.jar
+#         remote: /root/app/
+#         host: ${{ secrets.HOST }}
+#         username: ${{ secrets.SSH_USER }}
+#         password: ${{ secrets.PASSWORD }}
+    - run: ls build/libs
+    - name: Copy file via scp
+      uses: appleboy/scp-action@master
+      env:
+        HOST: ${{ secrets.HOST }}
+        USERNAME: ${{ secrets.SSH_USER }}
+        KEY: ${{ secrets.PASSWORD }}
       with:
-        local: build/libs/dataworker-1.jar
-        remote: /root/app/
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER }}
-        password: ${{ secrets.PASSWORD }}
+        source: "build/libs"
+        target: "/root/app"
