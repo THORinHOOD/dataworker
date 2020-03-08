@@ -24,7 +24,8 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterUnindex
                 "twitter_need_friends",
                 String.class,
                 String.class,
-                relatedTableRepo
+                relatedTableRepo,
+                TwitterDBService.class
         );
     }
 

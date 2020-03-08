@@ -23,7 +23,8 @@ public class VKDBService extends DBService<VKTableRepo, VKUnindexedTableRepo, VK
                 "vk_need_friends",
                 Long.class,
                 String.class,
-                relatedTableRepo
+                relatedTableRepo,
+                VKDBService.class
         );
     }
 

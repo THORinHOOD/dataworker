@@ -3,6 +3,7 @@ package com.thorinhood.dataworker.configs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
 import org.springframework.data.cassandra.config.CassandraClusterFactoryBean;
 import org.springframework.data.cassandra.config.SchemaAction;
@@ -39,6 +40,8 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
         return SchemaAction.CREATE_IF_NOT_EXISTS;
     }
 
+
+    @Profile("!test")
     @Bean
     public CassandraClusterFactoryBean cluster() {
         CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();
@@ -49,6 +52,8 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
         cluster.setMetricsEnabled(false);
         return cluster;
     }
+
+
 
     @Bean
     public CassandraMappingContext cassandraMapping() throws ClassNotFoundException {

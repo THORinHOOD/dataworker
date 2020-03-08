@@ -72,9 +72,6 @@ public class VKDataUtil {
     private static void extractLink(VKTable vkTable, String pattern, int group, Function<VKTable, String> getOldValue,
                                     BiConsumer<VKTable, String> setter, String line) {
         String result = extractIdLink(pattern, group, line);
-        if (getOldValue.apply(vkTable) != null && !result.isEmpty()) {
-            System.out.println("Change from " + getOldValue.apply(vkTable) + " to " + result);
-        }
         if (!result.isEmpty()) {
             setter.accept(vkTable, result);
         }

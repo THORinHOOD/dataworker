@@ -24,7 +24,7 @@ public class VKParser {
             int a = 5;
             return null;
         } catch (Exception e) {
-            System.out.println(String.format("Can't get friends of user %d", id));
+//            System.out.println(String.format("Can't get friends of user %d", id));
             return Collections.emptyList();
         }
     }

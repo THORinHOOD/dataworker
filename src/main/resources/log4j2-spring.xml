@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %logger{36} %style{%C{1.}}{bright,yellow}: %msg%n%throwable" />
+        </Console>
+
+        <RollingFile name="RollingFile"
+                     fileName="~/logs/dataworker.log"
+                     filePattern="~/logs/dataworker-$${date:yyyy-MM}/dataworker-%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%d %p [%logger{36}] [%t] : %m%n%throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+<!--            <AppenderRef ref="Console" />-->
+            <AppenderRef ref="RollingFile" />
+        </Root>
+
+        <Logger name="com.thorinhood" level="trace"></Logger>
+    </Loggers>
+
+</Configuration>

@@ -5,9 +5,10 @@ import com.thorinhood.dataworker.services.db.DBService;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.utils.common.BatchProfiles;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -16,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID, UNID>,
                                    TABLEREPO extends CassandraRepository<TABLE, ID>,
@@ -25,48 +25,42 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
                                    UNTABLE extends HasId<UNID>,
                                    ID, UNID> {
 
+    protected final Logger logger;
     protected final DB dbService;
     protected final SocialService<TABLE, ID> service;
     protected BlockingQueue<BatchProfiles<TABLE, ID>> profilesQueue;
+    private final Class loaderClass;
 
-
-    public CommonLoader(DB dbService, SocialService<TABLE, ID> service) {
+    public CommonLoader(DB dbService, SocialService<TABLE, ID> service, Class loaderClass) {
         this.dbService = dbService;
         this.service = service;
         profilesQueue = new LinkedBlockingQueue<>();
+        this.loaderClass = loaderClass;
+        logger = LoggerFactory.getLogger(loaderClass);
     }
 
     public void loadData(List<ID> ids) {
+        logger.info("Start loading profiles : " + ids.toString());
         ExecutorService threadPool = Executors.newFixedThreadPool(ids.size() + 1);
         Future<?> futureDB = threadPool.submit(() -> dbService.savePagesProcess(profilesQueue, ids.size()));
         ids.stream()
             .map(id -> threadPool.submit(
-                () -> service.getDefaultUsersInfo(Collections.singletonList(id), profilesQueue)
+                () -> service.getUsersInfo(Collections.singletonList(id), profilesQueue)
             ))
             .forEach(future -> {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    logger.error("Error while getting future", e);
                 }
             });
         try {
             futureDB.get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            logger.error("Error white getting db future", e);
         }
         threadPool.shutdownNow();
-        System.out.println("Ending loading data...");
+        logger.info("Ended loading profiles...");
     }
-
-//    public void loadData() {
-//       // List<UNID> unindexedPages = dbService.getAllUnindexedPages();
-//        if (!CollectionUtils.isEmpty(unindexedPages)) {
-//            Collection<TABLE> users = service.getDefaultUsersInfo(unindexedPages.stream()
-//                    .map(String::valueOf)
-//                    .collect(Collectors.toList()));
-//            dbService.savePages(users);
-//        }
-//    }
 
 }

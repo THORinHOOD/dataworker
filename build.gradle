@@ -5,13 +5,16 @@ plugins {
 }
 
 group = 'com.thorinhood'
-version = '0.0.1-SNAPSHOT'
+version = '1'
 sourceCompatibility = '11'
 
 configurations {
 	developmentOnly
 	runtimeClasspath {
 		extendsFrom developmentOnly
+	}
+	configurations {
+		compile.exclude module: 'spring-boot-starter-logging'
 	}
 }
 
@@ -29,9 +32,12 @@ dependencies {
 	compile 'org.jsoup:jsoup:1.13.1'
 	compile 'com.googlecode.json-simple:json-simple:1.1'
 
-//	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compile 'org.springframework.boot:spring-boot-starter-web'
+	compile 'org.springframework.boot:spring-boot-starter-log4j2'
+
+	compile 'org.springframework.boot:spring-boot-starter-aop'
 //	compile group: 'org.springframework.social', name: 'spring-social-config', version: '2.0.0.M4'
 //	implementation 'org.springframework.social:spring-social-web:2.0.0.M4'
 	implementation "org.springframework.social:spring-social-web:+"
@@ -51,6 +57,12 @@ dependencies {
 	//cassandra
 	compile 'org.springframework.boot:spring-boot-starter-data-cassandra:+'
 
+	compile 'org.hectorclient:hector-core:2.0-0'
+
+	testCompile ('org.cassandraunit:cassandra-unit-spring:2.1.9.2') {
+		exclude group : 'org.cassandraunit', module : 'cassandra-unit'
+	}
+	testCompile 'org.cassandraunit:cassandra-unit-shaded:2.1.9.2'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

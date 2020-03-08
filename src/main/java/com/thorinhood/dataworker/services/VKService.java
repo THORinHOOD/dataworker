@@ -16,12 +16,13 @@ import com.vk.api.sdk.objects.ServiceClientCredentialsFlowResponse;
 import com.vk.api.sdk.objects.friends.responses.GetResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
+import com.vk.api.sdk.queries.users.UsersGetQuery;
 import com.vk.api.sdk.queries.users.UsersNameCase;
 import org.apache.commons.collections4.CollectionUtils;
-import org.json.simple.parser.ParseException;
 import org.springframework.data.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -39,7 +38,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class VKService implements SocialService<VKTable, Long> {
+public class VKService extends SocialService<VKTable, Long> {
 
     private static final String USER_FIELD = "userField";
     private TransportClient transportClient;
@@ -55,6 +54,7 @@ public class VKService implements SocialService<VKTable, Long> {
                      Integer vkAppId,
                      VKDBService dbService,
                      VKFriendsService vkFriendsService) throws ClientException, ApiException {
+        super(VKService.class);
         this.dbService = dbService;
         this.vkFriendsService = vkFriendsService;
         transportClient = HttpTransportClient.getInstance();
@@ -128,14 +128,22 @@ public class VKService implements SocialService<VKTable, Long> {
                 pairs,
                 Collections.singletonList(UserField.CONNECTIONS),
                 UsersNameCase.NOMINATIVE,
-                10,
+                0,
                 queue,
                 userIds.stream().map(String::valueOf).toArray(String[]::new)
             );
             queue.put(BatchProfiles.end());
         } catch (ClientException | ApiException | InterruptedException e) {
-            e.printStackTrace();
+            logger.error("While getting users", e);
         }
+    }
+
+    public ServiceActor getServiceActor() {
+        return serviceActor;
+    }
+
+    public UsersGetQuery getUsersQuery() {
+        return vk.users().get(serviceActor);
     }
 
     public void getUsersInfo(Collection<FieldExtractor> pairs,
@@ -144,6 +152,8 @@ public class VKService implements SocialService<VKTable, Long> {
                              Integer depth,
                              BlockingQueue<BatchProfiles<VKTable, Long>> queue,
                              String... userIds) throws ClientException, ApiException {
+        logger.info("Start loading profiles : " + userIds.length);
+
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -169,18 +179,16 @@ public class VKService implements SocialService<VKTable, Long> {
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
         result.values().forEach(VKDataUtil::extractLinks);
-        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
-        measureTimeUtil.start();
         getUserFriends(result.values().stream().map(VKTable::getId).collect(Collectors.toList()))
                 .forEach(pair -> result.get(pair.getFirst()).setFriends(pair.getSecond()));
-        measureTimeUtil.end("It tooks %d");
 
         try {
             queue.put(BatchProfiles.next(result.values()));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Put data to queue", e);
         }
 
+        logger.info("Ended loading profiles : " + userIds.length);
         for (VKTable vkTable : result.values()) {
             Collection<String> friends = vkTable.getFriends();
             if (depth > 0 && CollectionUtils.isNotEmpty(friends)) {
@@ -208,12 +216,12 @@ public class VKService implements SocialService<VKTable, Long> {
                 try {
                     friendsPairs.add(future.get());
                 } catch(ExecutionException | InterruptedException exception) {
-                    exception.printStackTrace();
+                    logger.error("Getting future friends", exception);
                 }
             }
             return friendsPairs;
         } catch(InterruptedException exception) {
-            exception.printStackTrace();
+            logger.error("While getting friends", exception);
             return Collections.emptyList();
         }
     }
@@ -226,7 +234,7 @@ public class VKService implements SocialService<VKTable, Long> {
                     .userId(userId)
                     .execute();
         } catch(Exception exception) {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
             return Collections.emptyList();
         }
 

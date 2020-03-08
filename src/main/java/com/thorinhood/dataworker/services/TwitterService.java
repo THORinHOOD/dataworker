@@ -15,11 +15,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TwitterService implements SocialService<TwitterTable, String> {
+public class TwitterService extends SocialService<TwitterTable, String> {
 
     private Twitter twitter;
 
     public TwitterService(Twitter twitter) {
+        super(TwitterService.class);
         this.twitter = twitter;
     }
 
@@ -46,7 +47,7 @@ public class TwitterService implements SocialService<TwitterTable, String> {
             getUsersInfo(pairs, userScreenNames, 0, queue);
             queue.add(BatchProfiles.end());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("While getting users", e);
         }
     }
 

@@ -8,14 +8,18 @@ import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
 import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.Finder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getInstagram, RelatedTableRepo::findByInstagram)
     );
 
+    protected final Logger logger;
     protected final TABLEREPO tableRepo;
     protected final UNINDEXEDREPO unindexedRepo;
     protected final CassandraTemplate cassandraTemplate;
@@ -49,7 +54,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                      String needFriendsTable,
                      Class<ID> idClass,
                      Class<UNID> unidClass,
-                     RelatedTableRepo relatedTableRepo) {
+                     RelatedTableRepo relatedTableRepo,
+                     Class dbServiceClass) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
@@ -58,6 +64,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.idClass = idClass;
         this.unidClass = unidClass;
         this.relatedTableRepo = relatedTableRepo;
+        logger = LoggerFactory.getLogger(dbServiceClass);
     }
 
     public List<UNID> getAllUnindexedPages() {
@@ -65,14 +72,15 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     }
 
     public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {
+        logger.info("Start to receive profiles batches...");
         int current = threads;
         try {
             while (current > 0) {
-                System.out.println("Waiting next batch...");
+                logger.info("Waiting next batch...");
                 BatchProfiles<TABLE, ID> batchProfiles = queue.take();
                 if (batchProfiles.isEnd()) {
                     current--;
-                    System.out.println(String.format("Current progress : %d/%d", threads - current, threads));
+                    logger.info(String.format("Current progress : %d/%d", threads - current, threads));
                 } else {
                     Collection<TABLE> tables = batchProfiles.getProfiles();
                     tableRepo.saveAll(tables.stream()
@@ -80,17 +88,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                             .collect(Collectors.toList()));
                     relatedTableRepo.saveAll(actualize(convert(tables)));
                 }
+                logger.info("Saved batch...");
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("DB failed", e);
         }
-
-       // String deleteUnindexed = "DELETE FROM " + unindexedTable + " WHERE id = ?";
-       // String insertNeedFriends = "INSERT INTO " + needFriendsTable + " (id) VALUES (?)";
-        //tables.forEach(table -> {
-        //    cassandraTemplate.getCqlOperations().execute(deleteUnindexed, String.valueOf(table.id()));
-         //   cassandraTemplate.getCqlOperations().execute(insertNeedFriends, table.id());
-        //});
+        logger.info("Ended to receive profiles batches...");
     }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {
