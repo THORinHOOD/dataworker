@@ -33,4 +33,4 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.PASSWORD }}
         source: "app.jar"
-        target: "/root/service"
+        target: "/root/app"

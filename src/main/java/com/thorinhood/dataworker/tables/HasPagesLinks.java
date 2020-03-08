@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.tables;
 
 public interface HasPagesLinks {
-    Long vkId();
+    String vkId();
     String vkDomain();
     String twitter();
     String instagram();

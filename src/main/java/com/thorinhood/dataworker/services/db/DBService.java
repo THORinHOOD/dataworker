@@ -3,38 +3,38 @@ package com.thorinhood.dataworker.services.db;
 import com.datastax.driver.core.utils.UUIDs;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.HasId;
-import com.thorinhood.dataworker.tables.HasPagesLinks;
 import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
-import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.Finder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                UNINDEXEDREPO extends CassandraRepository<UNTABLE, UNID>,
+                                UNINDEXEDREPO extends CassandraRepository<UNTABLE, ID>,
                                 TABLE extends Profile<ID>,
-                                UNTABLE extends HasId<UNID>,
-                                ID, UNID> {
+                                UNTABLE extends HasId<ID>,
+                                ID> {
 
     private static final Collection<BiFunction<RelatedTableRepo, RelatedTable, RelatedTable>> findExistFunctions = Arrays.asList(
-            (repo, table) -> Finder.findByLongValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
-            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkDomain, RelatedTableRepo::findByVkDomain),
-            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getTwitter, RelatedTableRepo::findByTwitter),
-            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getFacebook, RelatedTableRepo::findByFacebook),
-            (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getInstagram, RelatedTableRepo::findByInstagram)
+        (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
+        (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkDomain, RelatedTableRepo::findByVkDomain),
+        (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getTwitter, RelatedTableRepo::findByTwitter),
+        (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getFacebook, RelatedTableRepo::findByFacebook),
+        (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getInstagram, RelatedTableRepo::findByInstagram)
     );
 
     protected final Logger logger;
@@ -44,8 +44,9 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final String unindexedTable;
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
-    protected final Class<UNID> unidClass;
     protected final RelatedTableRepo relatedTableRepo;
+    protected final Function<ID, UNTABLE> createUnindexedTable;
+    protected final JdbcTemplate postgresJdbc;
 
     public DBService(TABLEREPO tableRepo,
                      UNINDEXEDREPO unindexedRepo,
@@ -53,8 +54,9 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                      String unindexedTable,
                      String needFriendsTable,
                      Class<ID> idClass,
-                     Class<UNID> unidClass,
                      RelatedTableRepo relatedTableRepo,
+                     Function<ID, UNTABLE> createUnindexedTable,
+                     JdbcTemplate postgresJdbc,
                      Class dbServiceClass) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
@@ -62,39 +64,68 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.unindexedRepo = unindexedRepo;
         this.needFriendsTable = needFriendsTable;
         this.idClass = idClass;
-        this.unidClass = unidClass;
         this.relatedTableRepo = relatedTableRepo;
         logger = LoggerFactory.getLogger(dbServiceClass);
+        this.createUnindexedTable = createUnindexedTable;
+        this.postgresJdbc = postgresJdbc;
     }
 
-    public List<UNID> getAllUnindexedPages() {
-        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, unidClass);
-    }
-
-    public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {
-        logger.info("Start to receive profiles batches...");
-        int current = threads;
+    @Transactional
+    public List<ID> takeUnindexedPages(int count) {
         try {
-            while (current > 0) {
-                logger.info("Waiting next batch...");
-                BatchProfiles<TABLE, ID> batchProfiles = queue.take();
-                if (batchProfiles.isEnd()) {
-                    current--;
-                    logger.info(String.format("Current progress : %d/%d", threads - current, threads));
-                } else {
-                    Collection<TABLE> tables = batchProfiles.getProfiles();
-                    tableRepo.saveAll(tables.stream()
-                            .filter(table -> !tableRepo.existsById(table.id()))
-                            .collect(Collectors.toList()));
-                    relatedTableRepo.saveAll(actualize(convert(tables)));
-                }
-                logger.info("Saved batch...");
+            if (count <= 0) {
+                return Collections.emptyList();
             }
-        } catch (Exception e) {
-            logger.error("DB failed", e);
+            postgresJdbc.execute("LOCK TABLE " + unindexedTable + " IN ACCESS EXCLUSIVE MODE;");
+            List<ID> ids = postgresJdbc.queryForList("select * from " + unindexedTable + " limit " + count, idClass);
+            if (ids.size() > 0) {
+                postgresJdbc.execute("DELETE FROM " + unindexedTable + " WHERE id in (" + ids.stream()
+                        .map(String::valueOf).map(x -> "\'" + x + "\'")
+                        .collect(Collectors.joining(",")) + ")");
+            }
+            postgresJdbc.execute("COMMIT;");
+            return ids;
+        } catch (Exception ex) {
+            logger.error("Failed to take unindexed pages", ex);
+            return Collections.emptyList();
         }
-        logger.info("Ended to receive profiles batches...");
     }
+
+//    public List<ID> getAllUnindexedPages() {
+//        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, idClass);
+//    }
+
+    public void saveProfiles(Collection<TABLE> profiles) {
+        tableRepo.saveAll(profiles.stream()
+                .filter(table -> !tableRepo.existsById(table.id()))
+                .collect(Collectors.toList()));
+        relatedTableRepo.saveAll(actualize(convert(profiles)));
+    }
+
+//    public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {
+//        logger.info("Start to receive profiles batches...");
+//        int current = threads;
+//        try {
+//            while (current > 0) {
+//                logger.info("Waiting next batch...");
+//                BatchProfiles<TABLE, ID> batchProfiles = queue.take();
+//                if (batchProfiles.isEnd()) {
+//                    current--;
+//                    logger.info(String.format("Current progress : %d/%d", threads - current, threads));
+//                } else {
+//                    Collection<TABLE> tables = batchProfiles.getProfiles();
+//                    tableRepo.saveAll(tables.stream()
+//                            .filter(table -> !tableRepo.existsById(table.id()))
+//                            .collect(Collectors.toList()));
+//                    relatedTableRepo.saveAll(actualize(convert(tables)));
+//                }
+//                logger.info("Saved batch...");
+//            }
+//        } catch (Exception e) {
+//            logger.error("DB failed", e);
+//        }
+//        logger.info("Ended to receive profiles batches...");
+//    }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {
         return tables.stream()
@@ -138,10 +169,24 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                 .collect(Collectors.toList());
     }
 
-    public void saveUnindexed(Collection<UNTABLE> ids) {
-        unindexedRepo.saveAll(ids.stream()
-                .filter(untable -> !unindexedRepo.existsById(untable.id()))
-                .collect(Collectors.toList()));
+    @Transactional
+    public void saveUnindexed(Collection<ID> ids) {
+        try {
+            if (CollectionUtils.isEmpty(ids)) {
+                return;
+            }
+            postgresJdbc.execute("LOCK TABLE " + unindexedTable + " IN ACCESS EXCLUSIVE MODE;");
+            for (ID id : ids) {
+                try {
+                    postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\')");
+                } catch(Exception ex) {
+                    logger.error("Error while insert unindexed", ex);
+                }
+            }
+            postgresJdbc.execute("COMMIT;");
+        } catch(Exception exception) {
+            logger.error("Failed to save unindexed pages", exception);
+        }
     }
 
     public Optional<TABLE> getPageById(ID id) {

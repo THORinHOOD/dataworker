@@ -8,8 +8,8 @@
         </Console>
 
         <RollingFile name="RollingFile"
-                     fileName="~/logs/dataworker.log"
-                     filePattern="~/logs/dataworker-$${date:yyyy-MM}/dataworker-%d{dd-MM-yyyy}-%i.log.gz">
+                     fileName="./logs/dataworker.log"
+                     filePattern="./logs/dataworker-$${date:yyyy-MM}/dataworker-%d{dd-MM-yyyy}-%i.log.gz">
             <PatternLayout>
                 <pattern>%d %p [%logger{36}] [%t] : %m%n%throwable</pattern>
             </PatternLayout>

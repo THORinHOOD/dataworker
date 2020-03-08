@@ -27,7 +27,7 @@ public class SuggestLinksController {
     }
 
     @GetMapping("/vk")
-    public VKTable getVKUser(@RequestParam Long id) {
+    public VKTable getVKUser(@RequestParam String id) {
         return dbService.getPageById(id).orElse(null);
     }
 

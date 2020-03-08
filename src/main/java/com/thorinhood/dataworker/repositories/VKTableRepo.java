@@ -5,5 +5,5 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface VKTableRepo extends CassandraRepository<VKTable, Long> {
+public interface VKTableRepo extends CassandraRepository<VKTable, String> {
 }

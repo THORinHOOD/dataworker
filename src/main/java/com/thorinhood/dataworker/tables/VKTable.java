@@ -5,13 +5,14 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import java.util.Collection;
 import java.util.List;
 
 @Table("vk")
-public class VKTable implements Profile<Long> {
+public class VKTable implements Profile<String> {
 
     @PrimaryKey
-    private Long id;
+    private String id;
 
     @Column
     private String about;
@@ -85,12 +86,12 @@ public class VKTable implements Profile<Long> {
         return friends;
     }
 
-    public VKTable setId(Long id) {
+    public VKTable setId(String id) {
         this.id = id;
         return this;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -237,12 +238,12 @@ public class VKTable implements Profile<Long> {
     }
 
     @Override
-    public Long id() {
+    public String id() {
         return getId();
     }
 
     @Override
-    public Long vkId() {
+    public String vkId() {
         return id;
     }
 
@@ -264,5 +265,10 @@ public class VKTable implements Profile<Long> {
     @Override
     public String facebook() {
         return facebook;
+    }
+
+    @Override
+    public Collection<String> getLinked() {
+        return getFriends();
     }
 }

@@ -32,6 +32,8 @@ dependencies {
 	compile 'org.jsoup:jsoup:1.13.1'
 	compile 'com.googlecode.json-simple:json-simple:1.1'
 
+	compile 'org.postgresql:postgresql:+'
+	compile 'org.springframework:spring-jdbc:+'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	compile 'org.springframework.boot:spring-boot-starter-web'

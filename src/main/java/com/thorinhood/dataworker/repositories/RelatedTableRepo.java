@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface RelatedTableRepo extends CassandraRepository<RelatedTable, UUID> {
 
     RelatedTable findByTwitter(String twitter);
-    RelatedTable findByVkId(Long vk);
+    RelatedTable findByVkId(String vk);
     RelatedTable findByVkDomain(String vk);
     RelatedTable findByFacebook(String facebook);
     RelatedTable findByInstagram(String instagram);

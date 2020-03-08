@@ -4,6 +4,9 @@ import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import java.util.Collection;
+import java.util.Collections;
+
 @Table("twitter")
 public class TwitterTable implements Profile<String> {
 
@@ -121,7 +124,7 @@ public class TwitterTable implements Profile<String> {
     }
 
     @Override
-    public Long vkId() {
+    public String vkId() {
         return null;
     }
 
@@ -143,5 +146,10 @@ public class TwitterTable implements Profile<String> {
     @Override
     public String facebook() {
         return null;
+    }
+
+    @Override
+    public Collection<String> getLinked() {
+        return Collections.emptyList();
     }
 }

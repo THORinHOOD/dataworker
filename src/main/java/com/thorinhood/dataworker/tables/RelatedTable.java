@@ -14,7 +14,7 @@ public class RelatedTable {
     @Column("vk_domain")
     private String vkDomain;
     @Column("vk_id")
-    private Long vkId;
+    private String vkId;
     private String twitter;
     private String facebook;
     private String instagram;
@@ -44,7 +44,7 @@ public class RelatedTable {
         return vkDomain;
     }
 
-    public Long getVkId() {
+    public String getVkId() {
         return vkId;
     }
 
@@ -53,7 +53,7 @@ public class RelatedTable {
         return this;
     }
 
-    public RelatedTable setVkId(Long vkId) {
+    public RelatedTable setVkId(String vkId) {
         this.vkId = vkId;
         return this;
     }

@@ -7,6 +7,7 @@ import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,61 +25,37 @@ public class TwitterService extends SocialService<TwitterTable, String> {
         this.twitter = twitter;
     }
 
-    public Twitter getTwitter() {
-        return twitter;
-    }
-
     @Override
-    public void getDefaultUsersInfo(Collection<String> userScreenNames,
-                                    BlockingQueue<BatchProfiles<TwitterTable, String>> queue) {
+    public Collection<TwitterTable> getUsersInfo(List<String> users) {
         List<FieldExtractor> pairs = List.of(
-            pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
-            pair("name", TwitterProfile::getName, TwitterTable::setName),
-            pair("profileImageUrl", TwitterProfile::getProfileImageUrl, TwitterTable::setProfileImageUrl),
-            pair("description", TwitterProfile::getDescription, TwitterTable::setDescription),
-            pair("location", TwitterProfile::getLocation, TwitterTable::setLocation),
-            pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
-            pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
-            pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
-            pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
+                pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
+                pair("name", TwitterProfile::getName, TwitterTable::setName),
+                pair("profileImageUrl", TwitterProfile::getProfileImageUrl, TwitterTable::setProfileImageUrl),
+                pair("description", TwitterProfile::getDescription, TwitterTable::setDescription),
+                pair("location", TwitterProfile::getLocation, TwitterTable::setLocation),
+                pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
+                pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
+                pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
+                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
         );
 
         try {
-            getUsersInfo(pairs, userScreenNames, 0, queue);
-            queue.add(BatchProfiles.end());
+            return getUsersInfo(pairs, users);
         } catch (InterruptedException e) {
-            logger.error("While getting users", e);
+            logger.error("While loading twitter profiles", e);
+            return Collections.emptyList();
         }
     }
 
-    public void getUsersInfo(Collection<FieldExtractor> pairs,
+    public Collection<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames,
-                             int depth,
-                             BlockingQueue<BatchProfiles<TwitterTable, String>> queue,
                              long... userIds) throws InterruptedException {
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
         if (userIds != null && userIds.length > 0) {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
         }
 
-        HashSet<TwitterTable> result = new HashSet<>(convert(pairs, twitterProfiles));
-        queue.put(BatchProfiles.next(result));
-
-//        while (depth > 0) {
-//            getUsersInfo(
-//                pairs,
-//
-//            );
-////            for (String user : userScreenNames) {
-////                try {
-////                    result.addAll(convert(pairs, new ArrayList<>(twitter.friendOperations().getFriends(user))));
-////                } catch (Exception exception) {
-////
-////                }
-////            }
-////            depth--;
-//        }
-
+        return new HashSet<>(convert(pairs, twitterProfiles));
     }
 
     private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {
