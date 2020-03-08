@@ -24,22 +24,11 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-    - run: ls
-#     - name: Copy single file to remote
-#       uses: garygrossgarten/github-action-scp@release
-#       with:
-#         local: build/libs/dataworker-1.jar
-#         remote: /root/app/
-#         host: ${{ secrets.HOST }}
-#         username: ${{ secrets.SSH_USER }}
-#         password: ${{ secrets.PASSWORD }}
-    - run: ls build/libs
-    - name: Copy file via scp
-      uses: appleboy/scp-action@0.0.2
-      env:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.SSH_USER }}
-        KEY: ${{ secrets.PASSWORD }}
+    - name: copy file via ssh password
+      uses: appleboy/scp-action@master
       with:
-        source: "build/libs"
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.PASSWORD }}
+        source: "build/libs/dataworker-1.jar"
         target: "/root/app"
