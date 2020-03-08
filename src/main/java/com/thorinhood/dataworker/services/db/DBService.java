@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,20 +73,18 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.postgresJdbc = postgresJdbc;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public List<ID> takeUnindexedPages(int count) {
         try {
             if (count <= 0) {
                 return Collections.emptyList();
             }
-            postgresJdbc.execute("LOCK TABLE " + unindexedTable + " IN ACCESS EXCLUSIVE MODE;");
             List<ID> ids = postgresJdbc.queryForList("select * from " + unindexedTable + " limit " + count, idClass);
             if (ids.size() > 0) {
                 postgresJdbc.execute("DELETE FROM " + unindexedTable + " WHERE id in (" + ids.stream()
                         .map(String::valueOf).map(x -> "\'" + x + "\'")
                         .collect(Collectors.joining(",")) + ")");
             }
-            postgresJdbc.execute("COMMIT;");
             return ids;
         } catch (Exception ex) {
             logger.error("Failed to take unindexed pages", ex);
@@ -169,24 +170,31 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void saveUnindexed(Collection<ID> ids) {
+        logger.info("Start saving unindexed : " + ids.size());
         try {
             if (CollectionUtils.isEmpty(ids)) {
                 return;
             }
-            postgresJdbc.execute("LOCK TABLE " + unindexedTable + " IN ACCESS EXCLUSIVE MODE;");
             for (ID id : ids) {
                 try {
-                    postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\')");
+                    AtomicBoolean contains = new AtomicBoolean(false);
+                    postgresJdbc.query("SELECT * FROM " + unindexedTable + " WHERE id = \'" + id + "\'", rs -> {
+                        contains.set(true);
+                    });
+                    if (!contains.get()) {
+                        postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\')");
+                    }
                 } catch(Exception ex) {
                     logger.error("Error while insert unindexed", ex);
                 }
             }
-            postgresJdbc.execute("COMMIT;");
         } catch(Exception exception) {
             logger.error("Failed to save unindexed pages", exception);
+            return;
         }
+        logger.info("Saved unindexed : " + ids.size());
     }
 
     public Optional<TABLE> getPageById(ID id) {

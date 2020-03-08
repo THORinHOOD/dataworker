@@ -10,6 +10,7 @@ import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.repository.CassandraRepository;
+import org.springframework.data.util.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,11 +26,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID>,
-                                   TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                   UNTABLEREPO extends CassandraRepository<UNTABLE, ID>,
-                                   TABLE extends Profile<ID>,
-                                   UNTABLE extends HasId<ID>,
-                                   ID> {
+        TABLEREPO extends CassandraRepository<TABLE, ID>,
+        UNTABLEREPO extends CassandraRepository<UNTABLE, ID>,
+        TABLE extends Profile<ID>,
+        UNTABLE extends HasId<ID>,
+        ID> {
     private final static int THREADS_COUNT = 10;
     protected final Logger logger;
     protected final DB dbService;
@@ -45,18 +46,26 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
     }
 
     public void loadData(List<ID> ids) {
-        List<TABLE> users = Lists.partition(ids, ids.size()/THREADS_COUNT).stream()
-            .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
-            .flatMap(future -> {
-                Collection<TABLE> batch = Collections.emptyList();
-                try {
-                    batch = future.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while getting future", e);
-                }
-                return batch.stream();
-            })
-            .collect(Collectors.toList());
+        int countBatches = ids.size() / THREADS_COUNT;
+        if (countBatches < 1) {
+            countBatches = 1;
+        }
+        List<Future<Collection<TABLE>>> futures = Lists.partition(ids, countBatches).stream()
+                .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
+                .collect(Collectors.toList());
+
+        List<TABLE> users = futures.stream()
+                .flatMap(future -> {
+                    Collection<TABLE> batch = Collections.emptyList();
+                    try {
+                        batch = future.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("Error while getting future", e);
+                    }
+                    return batch.stream();
+                })
+                .collect(Collectors.toList());
+
         dbService.saveProfiles(users);
         dbService.saveUnindexed(users.stream()
                 .flatMap(profile -> profile.getLinked().stream())
