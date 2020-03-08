@@ -24,3 +24,6 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - run: ls
+#     - name: SSH Commands
+#       uses: appleboy/ssh-action@v0.0.2
