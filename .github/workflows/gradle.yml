@@ -26,7 +26,6 @@ jobs:
       run: ./gradlew build
     - run: ls
     - name: Deploy
-      uses: appleboy/ssh-action@v0.0.2
       env:
         server: ${{ secrets.server }}
         password : ${{ secrets.password }}  
