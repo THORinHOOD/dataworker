@@ -14,9 +14,11 @@
                 <pattern>%d %p [%logger{36}] [%t] : %m%n%throwable</pattern>
             </PatternLayout>
             <Policies>
+
                 <OnStartupTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="10 MB" />
                 <TimeBasedTriggeringPolicy />
+
             </Policies>
         </RollingFile>
     </Appenders>
