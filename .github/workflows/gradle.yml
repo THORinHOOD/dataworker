@@ -29,7 +29,7 @@ jobs:
       uses: garygrossgarten/github-action-scp@release
       with:
         local: build/libs/dataworker-1.jar
-        remote: app/
+        remote: /root/app/
         host: ${{ secrets.HOST }}
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.PASSWORD }}
