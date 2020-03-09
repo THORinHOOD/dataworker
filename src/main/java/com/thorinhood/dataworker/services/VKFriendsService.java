@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.SSLProtocolException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -88,7 +89,7 @@ public class VKFriendsService {
                 response = restTemplate.postForEntity(vkfaces, request, String.class);
                 gotcha = true;
             } catch (Exception exception) {
-                if (!(exception instanceof SSLProtocolException)) {
+                if (!(exception instanceof SocketException)) {
                     logger.error("Can't get friends of " + id, exception);
                     gotcha = true;
                 } else {
