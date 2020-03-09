@@ -76,7 +76,6 @@ public class VKFriendsService {
                 .filter(x -> CollectionUtils.isNotEmpty(x.getSecond()))
                 .distinct()
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-        shutdownAndAwaitTermination(executorService);
         return result;
     }
 
