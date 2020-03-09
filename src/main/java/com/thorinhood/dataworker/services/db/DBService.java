@@ -174,6 +174,10 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                 .collect(Collectors.toList());
     }
 
+    private String batch(Collection<ID> ids) {
+        return ids.stream().map(x -> "(\'" + x + "\')").collect(Collectors.joining(","));
+    }
+
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void saveUnindexed(Collection<ID> ids) {
         logger.info("Start saving unindexed : " + ids.size());
@@ -181,13 +185,11 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             if (CollectionUtils.isEmpty(ids)) {
                 return;
             }
-            for (ID id : ids) {
-                try {
-                    postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\') ON CONFLICT " +
-                            "(id) DO NOTHING");
-                } catch(Exception ex) {
-                    logger.error("Error while insert unindexed", ex);
-                }
+            try {
+                postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES " + batch(ids)  + " ON CONFLICT " +
+                        "(id) DO NOTHING");
+            } catch(Exception ex) {
+                logger.error("Error while insert unindexed", ex);
             }
         } catch(Exception exception) {
             logger.error("Failed to save unindexed pages", exception);
