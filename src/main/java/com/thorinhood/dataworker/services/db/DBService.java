@@ -95,7 +95,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     }
 
     public void saveProfiles(Collection<TABLE> profiles) {
-        Lists.partition(new ArrayList<>(profiles), 200).forEach(partition -> {
+        Lists.partition(new ArrayList<>(profiles), 50).forEach(partition -> {
             tableRepo.saveAll(partition.stream()
                     .filter(table -> !tableRepo.existsById(table.id()))
                     .collect(Collectors.toList()));

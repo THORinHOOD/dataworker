@@ -30,9 +30,16 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexed
         this.relatedTableRepo = relatedTableRepo;
     }
 
-    @Scheduled(fixedRate = 5 * 1000)
+    @PostConstruct
     public void loadData() {
-        super.loadData(dbService.takeUnindexedPages(1000));
+        List<String> next = Collections.singletonList("thorinhoodie");
+        int depth = 10;
+        while (depth > 0) {
+            List<String> buffer = super.loadData(next);
+            next.clear();
+            next = buffer;
+            depth--;
+        }
     }
 
 }

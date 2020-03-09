@@ -40,7 +40,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
         logger = LoggerFactory.getLogger(loaderClass);
     }
 
-    public void loadData(List<ID> ids) {
+    public List<ID> loadData(List<ID> ids) {
         int countBatches = ids.size() / THREADS_COUNT;
         if (countBatches < 1) {
             countBatches = 1;
@@ -62,7 +62,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
                 .collect(Collectors.toList());
 
         dbService.saveProfiles(users);
-        dbService.saveUnindexed(users.stream()
+        return users.stream()
                 .flatMap(profile -> {
                     if (CollectionUtils.isEmpty(profile.getLinked())) {
                         return Stream.empty();
@@ -70,7 +70,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
                     return profile.getLinked().stream();
                 })
                 .distinct()
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
     }
 
 }
