@@ -5,23 +5,18 @@ import com.thorinhood.dataworker.services.SocialService;
 import com.thorinhood.dataworker.services.db.DBService;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
-import com.thorinhood.dataworker.tables.VKUnindexedTable;
-import com.thorinhood.dataworker.utils.common.BatchProfiles;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.repository.CassandraRepository;
-import org.springframework.data.util.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,7 +63,12 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
 
         dbService.saveProfiles(users);
         dbService.saveUnindexed(users.stream()
-                .flatMap(profile -> profile.getLinked().stream())
+                .flatMap(profile -> {
+                    if (CollectionUtils.isEmpty(profile.getLinked())) {
+                        return Stream.empty();
+                    }
+                    return profile.getLinked().stream();
+                })
                 .distinct()
                 .collect(Collectors.toList()));
     }
