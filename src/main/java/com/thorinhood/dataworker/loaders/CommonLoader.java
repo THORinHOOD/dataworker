@@ -44,7 +44,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
         logger.info("Started to load and save profiles : " + ids.size());
         List<ID> result = Lists.partition(ids, 200).stream()
             .flatMap(partition -> {
-                List<TABLE> users = service.getUsersInfo(ids);
+                List<TABLE> users = service.getUsersInfo(partition);
                 List<ID> friends = Lists.partition(users, 50).stream()
                         .peek(dbService::saveProfiles)
                         .flatMap(Collection::stream)
