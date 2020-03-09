@@ -183,13 +183,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             }
             for (ID id : ids) {
                 try {
-                    AtomicBoolean contains = new AtomicBoolean(false);
-                    postgresJdbc.query("SELECT * FROM " + unindexedTable + " WHERE id = \'" + id + "\'", rs -> {
-                        contains.set(true);
-                    });
-                    if (!contains.get()) {
-                        postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\')");
-                    }
+                    postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES (\'" + id + "\') ON CONFLICT " +
+                            "(id) DO NOTHING");
                 } catch(Exception ex) {
                     logger.error("Error while insert unindexed", ex);
                 }
