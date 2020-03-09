@@ -83,18 +83,15 @@ public class VKFriendsService {
 //        measureTimeUtil.start();
         ResponseEntity<String> response = null;
         boolean gotcha = false;
-        while (!gotcha) {
-            Thread.sleep(50L);
+        int count = 0;
+        while (!gotcha && count < 3) {
+            Thread.sleep(100L);
             try {
                 response = restTemplate.postForEntity(vkfaces, request, String.class);
                 gotcha = true;
             } catch (Exception exception) {
-                if (!(exception instanceof SocketException)) {
-                    logger.error("Can't get friends of " + id, exception);
-                    gotcha = true;
-                } else {
-                    logger.error("Restart loading friends for" + id);
-                }
+                logger.error("Can't get friends of " + id);
+                count++;
             }
         }
 
