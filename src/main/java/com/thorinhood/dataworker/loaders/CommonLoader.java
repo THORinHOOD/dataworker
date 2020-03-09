@@ -42,19 +42,24 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
 
     public List<ID> loadData(List<ID> ids) {
         logger.info("Started to load and save profiles : " + ids.size());
-        List<TABLE> result = service.getUsersInfo(ids);
-        List<ID> friends = Lists.partition(result, 50).stream()
-                .peek(dbService::saveProfiles)
-                .flatMap(Collection::stream)
-                .flatMap(x -> {
-                    if (CollectionUtils.isNotEmpty(x.getLinked())) {
-                        return x.getLinked().stream();
-                    }
-                    return Stream.empty();
-                })
-                .collect(Collectors.toList());
+        List<ID> result = Lists.partition(ids, 200).stream()
+            .flatMap(partition -> {
+                List<TABLE> users = service.getUsersInfo(ids);
+                List<ID> friends = Lists.partition(users, 50).stream()
+                        .peek(dbService::saveProfiles)
+                        .flatMap(Collection::stream)
+                        .flatMap(x -> {
+                            if (CollectionUtils.isNotEmpty(x.getLinked())) {
+                                return x.getLinked().stream();
+                            }
+                            return Stream.empty();
+                        })
+                        .collect(Collectors.toList());
+                return friends.stream();
+            })
+            .collect(Collectors.toList());
         logger.info("Loaded and saved profiles : " + ids.size());
-        return friends;
+        return result;
 //        List<Future<Collection<TABLE>>> futures = Lists.partition(ids, countBatches).stream()
 //                .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
 //                .collect(Collectors.toList());
