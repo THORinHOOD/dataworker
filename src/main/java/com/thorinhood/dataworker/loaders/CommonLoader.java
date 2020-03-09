@@ -12,7 +12,6 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -42,36 +41,46 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
     }
 
     public List<ID> loadData(List<ID> ids) {
-        int countBatches = ids.size() / THREADS_COUNT;
-        if (countBatches < 1) {
-            countBatches = 1;
-        }
-        List<Future<Collection<TABLE>>> futures = Lists.partition(ids, countBatches).stream()
-                .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
-                .collect(Collectors.toList());
-
-        return futures.stream()
-            .flatMap(future -> {
-                try {
-                    Collection<TABLE> batch = future.get();
-                    int count = batch.size() / 50;
-                    if (count == 0) {
-                        count = 1;
+        logger.info("Started to load and save profiles : " + ids.size());
+        List<TABLE> result = service.getUsersInfo(ids);
+        List<ID> friends = Lists.partition(result, 50).stream()
+                .peek(dbService::saveProfiles)
+                .flatMap(Collection::stream)
+                .flatMap(x -> {
+                    if (CollectionUtils.isNotEmpty(x.getLinked())) {
+                        return x.getLinked().stream();
                     }
-                    Lists.partition(new ArrayList<>(batch), count).forEach(dbService::saveProfiles);
-                    logger.info("Saved profiles batch : " + batch.size());
-                    return batch.stream().flatMap(x -> {
-                        if (CollectionUtils.isNotEmpty(x.getLinked())) {
-                            return x.getLinked().stream();
-                        }
-                        return Stream.empty();
-                    });
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while getting future", e);
-                }
-                return Stream.empty();
-            })
-            .collect(Collectors.toList());
+                    return Stream.empty();
+                })
+                .collect(Collectors.toList());
+        logger.info("Loaded and saved profiles : " + ids.size());
+        return friends;
+//        List<Future<Collection<TABLE>>> futures = Lists.partition(ids, countBatches).stream()
+//                .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
+//                .collect(Collectors.toList());
+
+//        return futures.stream()
+//            .flatMap(future -> {
+//                try {
+//                    Collection<TABLE> batch = future.get();
+//                    int count = batch.size() / 50;
+//                    if (count == 0) {
+//                        count = 1;
+//                    }
+//                    Lists.partition(new ArrayList<>(batch), count).forEach(dbService::saveProfiles);
+//                    logger.info("Saved profiles batch : " + batch.size());
+//                    return batch.stream().flatMap(x -> {
+//                        if (CollectionUtils.isNotEmpty(x.getLinked())) {
+//                            return x.getLinked().stream();
+//                        }
+//                        return Stream.empty();
+//                    });
+//                } catch (InterruptedException | ExecutionException e) {
+//                    logger.error("Error while getting future", e);
+//                }
+//                return Stream.empty();
+//            })
+//            .collect(Collectors.toList());
     }
 
 }

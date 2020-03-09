@@ -6,6 +6,7 @@ import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,7 +27,7 @@ public class TwitterService extends SocialService<TwitterTable, String> {
     }
 
     @Override
-    public Collection<TwitterTable> getUsersInfo(List<String> users) {
+    public List<TwitterTable> getUsersInfo(List<String> users) {
         List<FieldExtractor> pairs = List.of(
                 pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
                 pair("name", TwitterProfile::getName, TwitterTable::setName),
@@ -47,7 +48,7 @@ public class TwitterService extends SocialService<TwitterTable, String> {
         }
     }
 
-    public Collection<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
+    public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames,
                              long... userIds) throws InterruptedException {
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
@@ -55,7 +56,7 @@ public class TwitterService extends SocialService<TwitterTable, String> {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
         }
 
-        return new HashSet<>(convert(pairs, twitterProfiles));
+        return new ArrayList<>(convert(pairs, twitterProfiles));
     }
 
     private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {

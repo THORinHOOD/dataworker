@@ -24,13 +24,14 @@ public class VKConfiguration {
     private Integer appId;
 
     @Bean
-    public VKService vkService(VKDBService dbService, VKFriendsService vkFriendsService) throws ClientException, ApiException {
+    public VKService vkService(VKDBService dbService,
+                               VKFriendsService vkFriendsService) throws ClientException, ApiException {
         return new VKService(serviceAccessKey, clientSecret, appId, dbService, vkFriendsService);
     }
 
     @Bean
     public VKFriendsService vkFriendsService() {
-        return new VKFriendsService(50);
+        return new VKFriendsService(10);
     }
 
 }

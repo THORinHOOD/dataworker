@@ -17,19 +17,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLProtocolException;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Function;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class VKFriendsService {
@@ -44,11 +40,27 @@ public class VKFriendsService {
         executorService = Executors.newFixedThreadPool(threadsCount);
     }
 
+    void shutdownAndAwaitTermination(ExecutorService pool) {
+        logger.debug("Start to shutdown executor...");
+        pool.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+                pool.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+                    logger.error("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+        }
+        logger.debug("Executor was stopped...");
+    }
+
     public Map<String, List<String>> getFriends(List<String> ids) {
         logger.info("Start loading friends : " + ids.size());
-        Set<String> sslErrors = new HashSet<>();
         List<Future<Pair<String, List<String>>>> futures = ids.stream()
-              //  .distinct()
                 .map(x -> executorService.submit(() -> getFriends(x)))
                 .collect(Collectors.toList());
         Map<String, List<String>> result = futures.stream()
@@ -64,7 +76,7 @@ public class VKFriendsService {
                 .filter(x -> CollectionUtils.isNotEmpty(x.getSecond()))
                 .distinct()
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-        logger.info("Ended loading friends : " + ids.size());
+        shutdownAndAwaitTermination(executorService);
         return result;
     }
 
@@ -79,27 +91,20 @@ public class VKFriendsService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-//        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
-//        measureTimeUtil.start();
         ResponseEntity<String> response = null;
         boolean gotcha = false;
         int count = 0;
-        while (!gotcha && count < 3) {
-            Thread.sleep(100L);
+        while (!gotcha && count < 10000) {
             try {
                 response = restTemplate.postForEntity(vkfaces, request, String.class);
                 gotcha = true;
             } catch (Exception exception) {
-                logger.error("Can't get friends of " + id);
                 count++;
             }
         }
 
-//        System.out.println(
-//                String.format("For user %s get friends took : %d ms", id, measureTimeUtil.resultMilliseconds())
-//        );
-
         if (response == null || !response.getStatusCode().equals(HttpStatus.OK)) {
+            logger.error("Can't get friends of : " + id);
             return Pair.of(id, Collections.emptyList());
         }
 

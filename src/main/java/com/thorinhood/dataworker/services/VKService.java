@@ -91,17 +91,17 @@ public class VKService extends SocialService<VKTable, String> {
                      VKFriendsService vkFriendsService) throws ClientException, ApiException {
         super(VKService.class);
         this.dbService = dbService;
-        this.vkFriendsService = vkFriendsService;
         transportClient = HttpTransportClient.getInstance();
         vk = new VkApiClient(transportClient);
         authResponse = vk.oauth()
                 .serviceClientCredentialsFlow(vkAppId, vkClientSecret)
                 .execute();
         serviceActor = new ServiceActor(vkAppId, vkClientSecret, vkServiceAccessKey);
+        this.vkFriendsService = vkFriendsService;
     }
 
     @Override
-    public Collection<VKTable> getUsersInfo(List<String> userIds) {
+    public List<VKTable> getUsersInfo(List<String> userIds) {
         try {
             return getUsersInfo(
                 pairs,
@@ -115,12 +115,11 @@ public class VKService extends SocialService<VKTable, String> {
         }
     }
 
-    public Collection<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
+    public List<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
                                             Collection<UserField> extra,
                                             UsersNameCase nameCase,
                                             List<String> userIds) throws ClientException, ApiException {
         logger.info("Start loading profiles : " + userIds.size());
-
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -149,7 +148,7 @@ public class VKService extends SocialService<VKTable, String> {
         vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
                 .forEach((id, friends) -> result.get(id).setFriends(friends));
         logger.info("Ended loading profiles : " + userIds.size());
-        return result.values();
+        return new ArrayList<>(result.values());
     }
 
     private <TYPE> FieldExtractor<UserXtrCounters, VKTable, TYPE> pair(String key,
