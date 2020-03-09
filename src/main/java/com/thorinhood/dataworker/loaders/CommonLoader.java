@@ -26,7 +26,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
         TABLE extends Profile<ID>,
         UNTABLE extends HasId<ID>,
         ID> {
-    private final static int THREADS_COUNT = 10;
+    private final static int THREADS_COUNT = 30;
     protected final Logger logger;
     protected final DB dbService;
     protected final SocialService<TABLE, ID> service;
@@ -49,28 +49,23 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
                 .map(batch -> threadPool.submit(() -> service.getUsersInfo(batch)))
                 .collect(Collectors.toList());
 
-        List<TABLE> users = futures.stream()
-                .flatMap(future -> {
-                    Collection<TABLE> batch = Collections.emptyList();
-                    try {
-                        batch = future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        logger.error("Error while getting future", e);
-                    }
-                    return batch.stream();
-                })
-                .collect(Collectors.toList());
-
-        dbService.saveProfiles(users);
-        return users.stream()
-                .flatMap(profile -> {
-                    if (CollectionUtils.isEmpty(profile.getLinked())) {
+        return futures.stream()
+            .flatMap(future -> {
+                try {
+                    Collection<TABLE> batch = future.get();
+                    dbService.saveProfiles(batch);
+                    return batch.stream().flatMap(x -> {
+                        if (CollectionUtils.isNotEmpty(x.getLinked())) {
+                            return x.getLinked().stream();
+                        }
                         return Stream.empty();
-                    }
-                    return profile.getLinked().stream();
-                })
-                .distinct()
-                .collect(Collectors.toList());
+                    });
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while getting future", e);
+                }
+                return Stream.empty();
+            })
+            .collect(Collectors.toList());
     }
 
 }

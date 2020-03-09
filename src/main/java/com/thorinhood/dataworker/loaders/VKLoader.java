@@ -30,7 +30,7 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexed
         this.relatedTableRepo = relatedTableRepo;
     }
 
-    @PostConstruct
+    @Scheduled(fixedDelay=Long.MAX_VALUE)
     public void loadData() {
         List<String> next = Collections.singletonList("thorinhoodie");
         int depth = 10;

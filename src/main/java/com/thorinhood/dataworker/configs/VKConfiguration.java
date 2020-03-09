@@ -30,7 +30,7 @@ public class VKConfiguration {
 
     @Bean
     public VKFriendsService vkFriendsService() {
-        return new VKFriendsService(20);
+        return new VKFriendsService(200);
     }
 
 }
