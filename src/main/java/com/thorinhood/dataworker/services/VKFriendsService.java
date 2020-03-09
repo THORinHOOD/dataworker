@@ -80,7 +80,7 @@ public class VKFriendsService {
 
 //        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
 //        measureTimeUtil.start();
-        ResponseEntity<String> response;
+        ResponseEntity<String> response = null;
         boolean gotcha = false;
         while (!gotcha) {
             Thread.sleep(100L);
@@ -101,7 +101,7 @@ public class VKFriendsService {
 //                String.format("For user %s get friends took : %d ms", id, measureTimeUtil.resultMilliseconds())
 //        );
 
-        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+        if (response == null || !response.getStatusCode().equals(HttpStatus.OK)) {
             return Pair.of(id, Collections.emptyList());
         }
 
