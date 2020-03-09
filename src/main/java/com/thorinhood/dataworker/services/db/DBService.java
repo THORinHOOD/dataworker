@@ -94,10 +94,6 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         }
     }
 
-//    public List<ID> getAllUnindexedPages() {
-//        return cassandraTemplate.getCqlOperations().queryForList("SELECT id FROM " + unindexedTable, idClass);
-//    }
-
     public void saveProfiles(Collection<TABLE> profiles) {
         Lists.partition(new ArrayList<>(profiles), 200).forEach(partition -> {
             tableRepo.saveAll(partition.stream()
@@ -106,31 +102,6 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             relatedTableRepo.saveAll(actualize(convert(partition)));
         });
     }
-
-//    public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {
-//        logger.info("Start to receive profiles batches...");
-//        int current = threads;
-//        try {
-//            while (current > 0) {
-//                logger.info("Waiting next batch...");
-//                BatchProfiles<TABLE, ID> batchProfiles = queue.take();
-//                if (batchProfiles.isEnd()) {
-//                    current--;
-//                    logger.info(String.format("Current progress : %d/%d", threads - current, threads));
-//                } else {
-//                    Collection<TABLE> tables = batchProfiles.getProfiles();
-//                    tableRepo.saveAll(tables.stream()
-//                            .filter(table -> !tableRepo.existsById(table.id()))
-//                            .collect(Collectors.toList()));
-//                    relatedTableRepo.saveAll(actualize(convert(tables)));
-//                }
-//                logger.info("Saved batch...");
-//            }
-//        } catch (Exception e) {
-//            logger.error("DB failed", e);
-//        }
-//        logger.info("Ended to receive profiles batches...");
-//    }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {
         return tables.stream()
