@@ -35,9 +35,7 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKUnindexed
         List<String> next = Collections.singletonList("thorinhoodie");
         int depth = 10;
         while (depth > 0) {
-            List<String> buffer = super.loadData(next);
-            next.clear();
-            next = buffer;
+            next = super.loadData(next);
             depth--;
         }
     }
