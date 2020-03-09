@@ -17,14 +17,18 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLProtocolException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VKFriendsService {
@@ -41,16 +45,17 @@ public class VKFriendsService {
 
     public Map<String, List<String>> getFriends(List<String> ids) {
         logger.info("Start loading friends : " + ids.size());
+        Set<String> sslErrors = new HashSet<>();
         List<Future<Pair<String, List<String>>>> futures = ids.stream()
               //  .distinct()
-                .map(id -> executorService.submit(() -> getFriends(id)))
+                .map(x -> executorService.submit(() -> getFriends(x)))
                 .collect(Collectors.toList());
         Map<String, List<String>> result = futures.stream()
                 .map(future -> {
                     Pair<String, List<String>> friends = Pair.of("", Collections.emptyList());
                     try {
                         friends = future.get();
-                    } catch(Exception exception) {
+                    } catch (Exception exception) {
                         logger.error("While getting future friend", exception);
                     }
                     return friends;
@@ -62,7 +67,7 @@ public class VKFriendsService {
         return result;
     }
 
-    public Pair<String, List<String>> getFriends(String id) throws ParseException {
+    public Pair<String, List<String>> getFriends(String id) throws ParseException, InterruptedException {
         List<String> result = new ArrayList<>();
 
         HttpHeaders headers = new HttpHeaders();
@@ -76,12 +81,22 @@ public class VKFriendsService {
 //        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
 //        measureTimeUtil.start();
         ResponseEntity<String> response;
-        try {
-            response = restTemplate.postForEntity(vkfaces, request, String.class);
-        } catch (Exception exception) {
-            logger.error("Can't get friends of " + id, exception);
-            return Pair.of(id, Collections.emptyList());
+        boolean gotcha = false;
+        while (!gotcha) {
+            Thread.sleep(100L);
+            try {
+                response = restTemplate.postForEntity(vkfaces, request, String.class);
+                gotcha = true;
+            } catch (Exception exception) {
+                if (!(exception instanceof SSLProtocolException)) {
+                    logger.error("Can't get friends of " + id, exception);
+                    gotcha = true;
+                } else {
+                    logger.error("Restart loading friends for" + id);
+                }
+            }
         }
+
 //        System.out.println(
 //                String.format("For user %s get friends took : %d ms", id, measureTimeUtil.resultMilliseconds())
 //        );
