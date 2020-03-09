@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -53,7 +54,11 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
             .flatMap(future -> {
                 try {
                     Collection<TABLE> batch = future.get();
-                    dbService.saveProfiles(batch);
+                    int count = batch.size() / 50;
+                    if (count == 0) {
+                        count = 1;
+                    }
+                    Lists.partition(new ArrayList<>(batch), count).forEach(dbService::saveProfiles);
                     logger.info("Saved profiles batch : " + batch.size());
                     return batch.stream().flatMap(x -> {
                         if (CollectionUtils.isNotEmpty(x.getLinked())) {

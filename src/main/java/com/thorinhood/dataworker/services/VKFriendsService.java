@@ -84,7 +84,7 @@ public class VKFriendsService {
         ResponseEntity<String> response = null;
         boolean gotcha = false;
         while (!gotcha) {
-            Thread.sleep(100L);
+            Thread.sleep(50L);
             try {
                 response = restTemplate.postForEntity(vkfaces, request, String.class);
                 gotcha = true;
