@@ -54,6 +54,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
                 try {
                     Collection<TABLE> batch = future.get();
                     dbService.saveProfiles(batch);
+                    logger.info("Saved profiles batch : " + batch.size());
                     return batch.stream().flatMap(x -> {
                         if (CollectionUtils.isNotEmpty(x.getLinked())) {
                             return x.getLinked().stream();
