@@ -29,8 +29,8 @@ public class VKConfiguration {
     }
 
     @Bean
-    public VKFriendsService vkFriendsService(VKDBService vkdbService) {
-        return new VKFriendsService(vkdbService);
+    public VKFriendsService vkFriendsService() {
+        return new VKFriendsService(1000);
     }
 
 }

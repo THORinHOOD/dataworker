@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.services.db;
 
 import com.datastax.driver.core.utils.UUIDs;
+import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -97,10 +99,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 //    }
 
     public void saveProfiles(Collection<TABLE> profiles) {
-        tableRepo.saveAll(profiles.stream()
-                .filter(table -> !tableRepo.existsById(table.id()))
-                .collect(Collectors.toList()));
-        relatedTableRepo.saveAll(actualize(convert(profiles)));
+        Lists.partition(new ArrayList<>(profiles), 200).forEach(partition -> {
+            tableRepo.saveAll(partition.stream()
+                    .filter(table -> !tableRepo.existsById(table.id()))
+                    .collect(Collectors.toList()));
+            relatedTableRepo.saveAll(actualize(convert(partition)));
+        });
     }
 
 //    public void savePagesProcess(BlockingQueue<BatchProfiles<TABLE, ID>> queue, int threads) {

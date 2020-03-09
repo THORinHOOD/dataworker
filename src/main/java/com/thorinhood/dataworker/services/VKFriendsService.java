@@ -1,11 +1,13 @@
 package com.thorinhood.dataworker.services;
 
-import com.thorinhood.dataworker.services.db.VKDBService;
-import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,19 +21,48 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class VKFriendsService {
+    private static final Logger logger = LoggerFactory.getLogger(VKFriendsService.class);
     private static final String vkfaces = "https://vkfaces.com/api/vk-user/friends";
 
-    private final VKDBService vkdbService;
     private RestTemplate restTemplate;
+    private ExecutorService executorService;
 
-    public VKFriendsService(VKDBService vkdbService) {
-        this.vkdbService = vkdbService;
+    public VKFriendsService(int threadsCount) {
         restTemplate = new RestTemplate();
+        executorService = Executors.newFixedThreadPool(threadsCount);
     }
 
-    public List<String> getFriends(String id) throws ParseException {
+    public Map<String, List<String>> getFriends(List<String> ids) {
+        logger.info("Start loading friends : " + ids.size());
+        List<Future<Pair<String, List<String>>>> futures = ids.stream()
+              //  .distinct()
+                .map(id -> executorService.submit(() -> getFriends(id)))
+                .collect(Collectors.toList());
+        Map<String, List<String>> result = futures.stream()
+                .map(future -> {
+                    Pair<String, List<String>> friends = Pair.of("", Collections.emptyList());
+                    try {
+                        friends = future.get();
+                    } catch(Exception exception) {
+                        logger.error("While getting future friend", exception);
+                    }
+                    return friends;
+                })
+                .filter(x -> CollectionUtils.isNotEmpty(x.getSecond()))
+                .distinct()
+                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+        logger.info("Ended loading friends : " + ids.size());
+        return result;
+    }
+
+    public Pair<String, List<String>> getFriends(String id) throws ParseException {
         List<String> result = new ArrayList<>();
 
         HttpHeaders headers = new HttpHeaders();
@@ -44,13 +75,19 @@ public class VKFriendsService {
 
 //        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
 //        measureTimeUtil.start();
-        ResponseEntity<String> response = restTemplate.postForEntity(vkfaces, request , String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.postForEntity(vkfaces, request, String.class);
+        } catch (Exception exception) {
+            logger.error("Can't get friends of " + id, exception);
+            return Pair.of(id, Collections.emptyList());
+        }
 //        System.out.println(
 //                String.format("For user %s get friends took : %d ms", id, measureTimeUtil.resultMilliseconds())
 //        );
 
         if (!response.getStatusCode().equals(HttpStatus.OK)) {
-            return Collections.emptyList();
+            return Pair.of(id, Collections.emptyList());
         }
 
         JSONObject jo = (JSONObject) new JSONParser().parse(response.getBody());
@@ -60,7 +97,7 @@ public class VKFriendsService {
             JSONObject friend = (JSONObject) friendsItr.next();
             result.add((String) friend.get("domain"));
         }
-        return result;
+        return Pair.of(id, result);
     }
 
 }

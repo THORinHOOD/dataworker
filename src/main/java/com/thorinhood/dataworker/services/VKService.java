@@ -14,7 +14,6 @@ import com.vk.api.sdk.objects.ServiceClientCredentialsFlowResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
-import org.springframework.data.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,7 +83,6 @@ public class VKService extends SocialService<VKTable, String> {
     private ServiceActor serviceActor;
     private VKDBService dbService;
     private VKFriendsService vkFriendsService;
-    private ExecutorService executorService;
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,
@@ -105,7 +98,6 @@ public class VKService extends SocialService<VKTable, String> {
                 .serviceClientCredentialsFlow(vkAppId, vkClientSecret)
                 .execute();
         serviceActor = new ServiceActor(vkAppId, vkClientSecret, vkServiceAccessKey);
-        executorService = Executors.newFixedThreadPool(50);
     }
 
     @Override
@@ -154,35 +146,10 @@ public class VKService extends SocialService<VKTable, String> {
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
         result.values().forEach(VKDataUtil::extractLinks);
-        List<Pair<String, List<String>>> friendsPairs = getUserFriends(result.values().stream()
-                .map(VKTable::getId)
-                .collect(Collectors.toList()));
-        friendsPairs.forEach(pair -> result.get(pair.getFirst()).setFriends(pair.getSecond()));
-
+        vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
+                .forEach((id, friends) -> result.get(id).setFriends(friends));
         logger.info("Ended loading profiles : " + userIds.size());
         return result.values();
-    }
-
-    private List<Pair<String, List<String>>> getUserFriends(Collection<String> ids) {
-        try {
-            Collection<Callable<Pair<String, List<String>>>> tasks = ids.stream()
-                    .map(id -> (Callable<Pair<String, List<String>>>)
-                            () -> Pair.of(id, vkFriendsService.getFriends(id)))
-                    .collect(Collectors.toList());
-            List<Future<Pair<String, List<String>>>> futures = executorService.invokeAll(tasks);
-            List<Pair<String, List<String>>> friendsPairs = new ArrayList<>();
-            for (Future<Pair<String, List<String>>> future : futures) {
-                try {
-                    friendsPairs.add(future.get());
-                } catch(ExecutionException | InterruptedException exception) {
-                    logger.error("Getting future friends", exception);
-                }
-            }
-            return friendsPairs;
-        } catch(InterruptedException exception) {
-            logger.error("While getting friends", exception);
-            return Collections.emptyList();
-        }
     }
 
     private <TYPE> FieldExtractor<UserXtrCounters, VKTable, TYPE> pair(String key,
