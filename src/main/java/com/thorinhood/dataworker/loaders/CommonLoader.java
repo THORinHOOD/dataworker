@@ -12,6 +12,7 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -45,9 +46,8 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
         List<ID> result = Lists.partition(ids, 200).stream()
             .flatMap(partition -> {
                 List<TABLE> users = service.getUsersInfo(partition);
-                List<ID> friends = Lists.partition(users, 50).stream()
-                        .peek(dbService::saveProfiles)
-                        .flatMap(Collection::stream)
+                List<ID> friends = users.stream()
+                        .peek(x -> dbService.saveProfiles(Collections.singletonList(x)))
                         .flatMap(x -> {
                             if (CollectionUtils.isNotEmpty(x.getLinked())) {
                                 return x.getLinked().stream();
