@@ -6,6 +6,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Table("twitter")
 public class TwitterTable implements Profile<String> {
@@ -151,5 +152,10 @@ public class TwitterTable implements Profile<String> {
     @Override
     public Collection<String> getLinked() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<FriendsPair> generatePairs() {
+        return null;
     }
 }

@@ -3,10 +3,15 @@ package com.thorinhood.dataworker.services.db;
 import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
+import com.thorinhood.dataworker.tables.FriendsPair;
+import com.thorinhood.dataworker.tables.FriendsPairsGenerator;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
+import com.thorinhood.dataworker.tables.VKFriendsTable;
+import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.Finder;
+import com.vk.api.sdk.actions.Friends;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +34,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                UNINDEXEDREPO extends CassandraRepository<UNTABLE, ID>,
-                                TABLE extends Profile<ID>,
-                                UNTABLE extends HasId<ID>,
-                                ID> {
+                                FRIENDSREPO extends CassandraRepository<TABLE_FRIENDS, FRIENDS_KEY>,
+                                TABLE extends Profile<ID, TABLE_FRIENDS>,
+                                ID,
+                                TABLE_FRIENDS extends FriendsPair,
+                                FRIENDS_KEY> {
 
     private static final Collection<BiFunction<RelatedTableRepo, RelatedTable, RelatedTable>> findExistFunctions = Arrays.asList(
         (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
@@ -44,35 +50,32 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 
     protected final Logger logger;
     protected final TABLEREPO tableRepo;
-    protected final UNINDEXEDREPO unindexedRepo;
     protected final CassandraTemplate cassandraTemplate;
     protected final String unindexedTable;
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
     protected final RelatedTableRepo relatedTableRepo;
-    protected final Function<ID, UNTABLE> createUnindexedTable;
     protected final JdbcTemplate postgresJdbc;
+    protected final FRIENDSREPO friendsRepo;
 
     public DBService(TABLEREPO tableRepo,
-                     UNINDEXEDREPO unindexedRepo,
+                     FRIENDSREPO friendsRepo,
                      CassandraTemplate cassandraTemplate,
                      String unindexedTable,
                      String needFriendsTable,
                      Class<ID> idClass,
                      RelatedTableRepo relatedTableRepo,
-                     Function<ID, UNTABLE> createUnindexedTable,
                      JdbcTemplate postgresJdbc,
                      Class dbServiceClass) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
-        this.unindexedRepo = unindexedRepo;
         this.needFriendsTable = needFriendsTable;
         this.idClass = idClass;
         this.relatedTableRepo = relatedTableRepo;
         logger = LoggerFactory.getLogger(dbServiceClass);
-        this.createUnindexedTable = createUnindexedTable;
         this.postgresJdbc = postgresJdbc;
+        this.friendsRepo = friendsRepo;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -99,6 +102,9 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             tableRepo.saveAll(partition.stream()
                     .filter(table -> !tableRepo.existsById(table.id()))
                     .collect(Collectors.toList()));
+            Lists.partition(partition.stream()
+                    .flatMap(profile -> profile.generatePairs().stream())
+                    .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll);
             relatedTableRepo.saveAll(actualize(convert(partition)));
         });
     }

@@ -4,12 +4,15 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Table("vk")
-public class VKTable implements Profile<String> {
+public class VKTable implements Profile<String, VKFriendsTable> {
 
     @PrimaryKey
     private String id;
@@ -62,7 +65,7 @@ public class VKTable implements Profile<String> {
     @Transient
     private String instagram;
 
-    @Column
+    @Transient
     private List<String> friends;
 
     @Column
@@ -270,5 +273,15 @@ public class VKTable implements Profile<String> {
     @Override
     public Collection<String> getLinked() {
         return getFriends();
+    }
+
+    @Override
+    public List<VKFriendsTable> generatePairs() {
+        if (CollectionUtils.isEmpty(friends)) {
+            return Collections.emptyList();
+        }
+        return friends.stream()
+                .map(id -> new VKFriendsTable().setKey(getId(), id))
+                .collect(Collectors.toList());
     }
 }

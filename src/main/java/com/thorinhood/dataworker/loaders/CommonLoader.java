@@ -3,30 +3,29 @@ package com.thorinhood.dataworker.loaders;
 import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.services.SocialService;
 import com.thorinhood.dataworker.services.db.DBService;
-import com.thorinhood.dataworker.tables.HasId;
+import com.thorinhood.dataworker.tables.FriendsPair;
 import com.thorinhood.dataworker.tables.Profile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, TABLE, UNTABLE, ID>,
+public abstract class CommonLoader<DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE, FRIENDS_KEY>,
         TABLEREPO extends CassandraRepository<TABLE, ID>,
-        UNTABLEREPO extends CassandraRepository<UNTABLE, ID>,
-        TABLE extends Profile<ID>,
-        UNTABLE extends HasId<ID>,
-        ID> {
+        FRIENDSREPO extends CassandraRepository<FRIENDS_TABLE, FRIENDS_KEY>,
+        TABLE extends Profile<ID, FRIENDS_TABLE>,
+        ID,
+        FRIENDS_TABLE extends FriendsPair,
+        FRIENDS_KEY> {
+
     private final static int THREADS_COUNT = 30;
     protected final Logger logger;
     protected final DB dbService;
@@ -41,7 +40,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, UNTABLEREPO, 
         logger = LoggerFactory.getLogger(loaderClass);
     }
 
-    public List<ID> loadData(List<ID> ids) {
+    public List<ID> loadData(List<ID> ids, BiFunction<ID, ID, FRIENDS_KEY> createFriendsPair) {
         logger.info("Started to load and save profiles : " + ids.size());
         List<ID> result = Lists.partition(ids, 200).stream()
             .flatMap(partition -> {
