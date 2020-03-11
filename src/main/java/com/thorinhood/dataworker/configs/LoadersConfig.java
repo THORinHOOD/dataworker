@@ -1,7 +1,6 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.loaders.VKLoader;
-import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.services.db.VKDBService;
 import org.springframework.context.annotation.Bean;

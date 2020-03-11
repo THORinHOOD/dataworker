@@ -50,7 +50,7 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKFriendsTa
     @Scheduled(fixedDelay=Long.MAX_VALUE)
     public void loadData() {
         List<String> next = Collections.singletonList("thorinhoodie");
-        int depth = 1;
+        int depth = 10;
         while (depth > 0) {
             next = super.loadData(next);
             depth--;

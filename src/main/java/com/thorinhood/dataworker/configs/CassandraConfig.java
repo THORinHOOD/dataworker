@@ -53,8 +53,6 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
         return cluster;
     }
 
-
-
     @Bean
     public CassandraMappingContext cassandraMapping() throws ClassNotFoundException {
         return new BasicCassandraMappingContext();

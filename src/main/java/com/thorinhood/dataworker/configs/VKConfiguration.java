@@ -23,6 +23,9 @@ public class VKConfiguration {
     @Value("${vk.app.id}")
     private Integer appId;
 
+    @Value("${vk.service.friends.threads}")
+    private Integer vkFriendsServiceThreadsCount;
+
     @Bean
     public VKService vkService(VKDBService dbService,
                                VKFriendsService vkFriendsService) throws ClientException, ApiException {
@@ -31,7 +34,7 @@ public class VKConfiguration {
 
     @Bean
     public VKFriendsService vkFriendsService() {
-        return new VKFriendsService(10);
+        return new VKFriendsService(vkFriendsServiceThreadsCount);
     }
 
 }

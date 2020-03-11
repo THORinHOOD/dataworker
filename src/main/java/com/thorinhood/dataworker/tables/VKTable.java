@@ -281,7 +281,7 @@ public class VKTable implements Profile<String, VKFriendsTable> {
             return Collections.emptyList();
         }
         return friends.stream()
-                .map(id -> new VKFriendsTable().setKey(getId(), id))
+                .map(id -> new VKFriendsTable().setKey(getDomain(), id))
                 .collect(Collectors.toList());
     }
 }

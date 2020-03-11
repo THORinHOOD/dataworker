@@ -116,7 +116,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     }
 
     private RelatedTable getExistsRelatedTable(RelatedTable relatedTable) {
-        RelatedTable result = null;
+        RelatedTable result;
         for (BiFunction<RelatedTableRepo, RelatedTable, RelatedTable> finder : findExistFunctions) {
             result = finder.apply(relatedTableRepo, relatedTable);
             if (result != null) {
