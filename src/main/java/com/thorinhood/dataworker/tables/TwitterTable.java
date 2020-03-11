@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Table("twitter")
-public class TwitterTable implements Profile<String> {
+public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @PrimaryKey
     private String screenName;
@@ -155,7 +155,7 @@ public class TwitterTable implements Profile<String> {
     }
 
     @Override
-    public List<FriendsPair> generatePairs() {
+    public List<TwitterFriendsTable> generatePairs() {
         return null;
     }
 }

@@ -18,7 +18,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class CommonLoader<DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE, FRIENDS_KEY>,
+public abstract class CommonLoader<
+        DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE, FRIENDS_KEY>,
         TABLEREPO extends CassandraRepository<TABLE, ID>,
         FRIENDSREPO extends CassandraRepository<FRIENDS_TABLE, FRIENDS_KEY>,
         TABLE extends Profile<ID, FRIENDS_TABLE>,
@@ -40,7 +41,7 @@ public abstract class CommonLoader<DB extends DBService<TABLEREPO, FRIENDSREPO, 
         logger = LoggerFactory.getLogger(loaderClass);
     }
 
-    public List<ID> loadData(List<ID> ids, BiFunction<ID, ID, FRIENDS_KEY> createFriendsPair) {
+    public List<ID> loadData(List<ID> ids) {
         logger.info("Started to load and save profiles : " + ids.size());
         List<ID> result = Lists.partition(ids, 200).stream()
             .flatMap(partition -> {

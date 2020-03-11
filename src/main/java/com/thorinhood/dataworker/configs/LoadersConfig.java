@@ -14,9 +14,8 @@ public class LoadersConfig {
 
     @Bean
     public VKLoader vkLoader(VKDBService dbService,
-                             VKService vkService,
-                             RelatedTableRepo relatedTableRepo) {
-        return new VKLoader(dbService, vkService, relatedTableRepo);
+                             VKService vkService) {
+        return new VKLoader(dbService, vkService);
     }
 
 }
