@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
@@ -25,7 +26,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class VKService extends SocialService<VKTable, String> {
+public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
 
     private final List<FieldExtractor> pairs = List.of(
         pair(UserField.DOMAIN, UserXtrCounters::getDomain, VKTable::setDomain),

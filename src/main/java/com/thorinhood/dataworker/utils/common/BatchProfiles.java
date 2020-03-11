@@ -1,19 +1,27 @@
 package com.thorinhood.dataworker.utils.common;
 
+import com.thorinhood.dataworker.tables.FriendsPair;
 import com.thorinhood.dataworker.tables.Profile;
 
 import java.util.Collection;
 
-public class BatchProfiles<TABLE extends Profile<ID>, ID> {
+public class BatchProfiles<
+        TABLE extends Profile<ID, FRIENDS_TABLE>,
+        ID,
+        FRIENDS_TABLE extends FriendsPair> {
 
     private final Collection<TABLE> profiles;
     private final boolean isEnd;
 
-    public static <TABLE2 extends Profile<ID2>, ID2>  BatchProfiles<TABLE2, ID2> end() {
+    public static <TABLE2 extends Profile<ID2, FRIENDS_TABLE2>,
+                   ID2,
+                   FRIENDS_TABLE2 extends FriendsPair> BatchProfiles<TABLE2, ID2, FRIENDS_TABLE2> end() {
         return new BatchProfiles<>();
     }
 
-    public static <TABLE2 extends Profile<ID2>, ID2>  BatchProfiles<TABLE2, ID2> next(Collection<TABLE2> profiles) {
+    public static <TABLE2 extends Profile<ID2, FRIENDS_TABLE2>,
+                   ID2, FRIENDS_TABLE2 extends FriendsPair>  BatchProfiles<TABLE2, ID2, FRIENDS_TABLE2>
+    next(Collection<TABLE2> profiles) {
         return new BatchProfiles<>(profiles);
     }
 

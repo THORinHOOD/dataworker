@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,11 +29,11 @@ public abstract class CommonLoader<
     private final static int THREADS_COUNT = 30;
     protected final Logger logger;
     protected final DB dbService;
-    protected final SocialService<TABLE, ID> service;
+    protected final SocialService<TABLE, ID, FRIENDS_TABLE> service;
     private final Class loaderClass;
     private final ExecutorService threadPool = Executors.newFixedThreadPool(THREADS_COUNT);
 
-    public CommonLoader(DB dbService, SocialService<TABLE, ID> service, Class loaderClass) {
+    public CommonLoader(DB dbService, SocialService<TABLE, ID, FRIENDS_TABLE> service, Class loaderClass) {
         this.dbService = dbService;
         this.service = service;
         this.loaderClass = loaderClass;

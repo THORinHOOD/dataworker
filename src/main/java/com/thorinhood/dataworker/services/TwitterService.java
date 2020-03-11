@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.services;
 
+import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
@@ -17,7 +18,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TwitterService extends SocialService<TwitterTable, String> {
+public class TwitterService extends SocialService<TwitterTable, String, TwitterFriendsTable> {
 
     private Twitter twitter;
 
