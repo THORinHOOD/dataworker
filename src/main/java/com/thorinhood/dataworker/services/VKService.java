@@ -115,7 +115,7 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
                 UsersNameCase.NOMINATIVE,
                 userIds
             );
-        } catch (ClientException | ApiException e) {
+        } catch (Exception e) {
             logger.error("While getting users", e);
             return Collections.emptyList();
         }

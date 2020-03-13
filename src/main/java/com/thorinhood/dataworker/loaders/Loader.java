@@ -55,6 +55,7 @@ public class Loader {
                         List<String> twitters = vkProfiles.stream()
                                 .map(VKTable::getTwitter)
                                 .filter(Objects::nonNull)
+                                .filter(x -> !"null".equalsIgnoreCase(x))
                                 .collect(Collectors.toList());
                         List<TwitterTable> twitterProfiles = twitterService.getUsersInfo(twitters);
                         twitterDBService.saveProfiles(twitterProfiles);

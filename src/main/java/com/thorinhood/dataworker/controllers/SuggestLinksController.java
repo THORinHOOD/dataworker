@@ -21,25 +21,16 @@ public class SuggestLinksController {
 
     private final VKDBService dbService;
     private final RelatedTableRepo relatedTableRepo;
-    private final Loader loader;
 
     public SuggestLinksController(VKDBService dbService,
-                                  RelatedTableRepo relatedTableRepo,
-                                  Loader loader) {
+                                  RelatedTableRepo relatedTableRepo) {
         this.dbService = dbService;
         this.relatedTableRepo = relatedTableRepo;
-        this.loader = loader;
     }
 
     @GetMapping("/vk")
     public VKTable getVKUser(@RequestParam String id) {
         return dbService.getPageById(id).orElse(null);
-    }
-
-    @GetMapping("/vk/start")
-    public void start(@RequestParam List<String> ids,
-                      @RequestParam int depth) {
-        new Thread(() -> loader.load(ids, depth)).start();
     }
 
     @GetMapping("/assumptions")
