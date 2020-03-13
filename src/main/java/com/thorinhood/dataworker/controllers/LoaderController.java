@@ -7,6 +7,8 @@ import com.thorinhood.dataworker.services.db.TwitterDBService;
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.utils.common.CallbackExecutor;
 import com.thorinhood.dataworker.utils.common.CallbackRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,8 @@ import java.util.concurrent.Executor;
 @RestController
 @RequestMapping("/loader")
 public class LoaderController {
+
+    private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
     private final Loader loader;
     private final VKService vkService;
@@ -51,6 +55,13 @@ public class LoaderController {
             new CallbackExecutor().execute(new CallbackRunnable() {
                 @Override
                 public void callback() {
+                    logger.info("Loader ended");
+                    executing = false;
+                }
+
+                @Override
+                public void error(Exception e) {
+                    logger.error("Loader failed with exception", e);
                     executing = false;
                 }
 

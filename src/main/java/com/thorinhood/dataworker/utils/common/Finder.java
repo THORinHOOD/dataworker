@@ -19,7 +19,7 @@ public class Finder {
                                     Function<RelatedTable, String> extractor,
                                     BiFunction<RelatedTableRepo, String, RelatedTable> finder) {
         String value = extractor.apply(relatedTable);
-        return value != null ? finder.apply(repo, value) : null;
+        return value != null && !value.equalsIgnoreCase("null") ? finder.apply(repo, value) : null;
     }
 
 }
