@@ -6,6 +6,7 @@ import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,9 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
 
     @Override
     public List<TwitterTable> getUsersInfo(List<String> users) {
+        if (CollectionUtils.isEmpty(users)) {
+            return Collections.emptyList();
+        }
         List<FieldExtractor> pairs = List.of(
                 pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
                 pair("name", TwitterProfile::getName, TwitterTable::setName),
@@ -55,13 +59,10 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
     }
 
     public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
-                             Collection<String> userScreenNames,
-                             long... userIds) throws InterruptedException {
+                             Collection<String> userScreenNames) throws InterruptedException {
+        logger.info("Start loading twitter profiles : " + userScreenNames.size());
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(String[]::new));
 
-        if (userIds != null && userIds.length > 0) {
-            twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
-        }
         Map<String, TwitterTable> profiles = convert(pairs, twitterProfiles)
                 .stream()
                 .collect(Collectors.toMap(TwitterTable::getScreenName, Function.identity()));
@@ -77,6 +78,7 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
 //            }
 //        });
         result.addAll(profiles.values());
+        logger.info("Ended loading twitter profiles : " + userScreenNames.size());
         return result;
     }
 

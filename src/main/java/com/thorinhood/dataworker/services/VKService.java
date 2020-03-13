@@ -16,6 +16,7 @@ import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
 import com.vk.api.sdk.queries.wall.WallGetQuery;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,6 +109,9 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
 
     @Override
     public List<VKTable> getUsersInfo(List<String> userIds) {
+        if (CollectionUtils.isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
         try {
             return getUsersInfo(
                 pairs,
@@ -125,7 +129,7 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
                                             Collection<UserField> extra,
                                             UsersNameCase nameCase,
                                             List<String> userIds) throws ClientException, ApiException {
-        logger.info("Start loading profiles : " + userIds.size());
+        logger.info("Start loading vk profiles : " + userIds.size());
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -153,7 +157,7 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
         result.values().forEach(VKDataUtil::extractLinks);
         vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
                 .forEach((id, friends) -> result.get(id).setFriends(friends));
-        logger.info("Ended loading profiles : " + userIds.size());
+        logger.info("Ended loading vk profiles : " + userIds.size());
         return new ArrayList<>(result.values());
     }
 
