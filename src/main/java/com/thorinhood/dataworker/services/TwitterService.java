@@ -45,7 +45,7 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
         try {
             return getUsersInfo(pairs, users);
         } catch (Exception e) {
-            logger.error("While loading twitter profiles", e);
+            logger.error("While loading twitter profiles : " + users.toString(), e);
             return Collections.emptyList();
         }
     }
