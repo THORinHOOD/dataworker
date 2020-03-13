@@ -37,10 +37,7 @@ public class Loader {
         this.twitterDBService = twitterDBService;
     }
 
-    @Scheduled(fixedRate = Long.MAX_VALUE)
-    public void load() {
-        List<String> vkIds = Collections.singletonList("thorinhoodie");
-        int depth = 15;
+    public void load(List<String> vkIds, int depth) {
         while (depth-- > 0) {
             logger.info("Start loading depth : " + (depth + 1));
             vkIds = Lists.partition(vkIds, 25).stream()
