@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BiConsumer;
@@ -38,7 +39,8 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
                 pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
                 pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
                 pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
-                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
+                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount),
+                pair("id", TwitterProfile::getId, TwitterTable::setId)
         );
 
         try {
@@ -49,15 +51,34 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
         }
     }
 
+    public Twitter getTwitter() {
+        return twitter;
+    }
+
     public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames,
                              long... userIds) throws InterruptedException {
-        List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(new String[0]));
+        List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(String[]::new));
+
         if (userIds != null && userIds.length > 0) {
             twitterProfiles.addAll(twitter.userOperations().getUsers(userIds));
         }
-
-        return new ArrayList<>(convert(pairs, twitterProfiles));
+        Map<String, TwitterTable> profiles = convert(pairs, twitterProfiles)
+                .stream()
+                .collect(Collectors.toMap(TwitterTable::getScreenName, Function.identity()));
+        ArrayList<TwitterTable> result = new ArrayList<>();
+        profiles.keySet().forEach(id -> {
+            try {
+                result.addAll(convert(pairs, twitter.userOperations().getUsers(
+                    twitter.friendOperations().getFriendIds(id).stream().mapToLong(Long::longValue).toArray()
+                )));
+                profiles.get(id).setFriends(new ArrayList<>());
+            } catch(Exception exception) {
+                logger.error("Can't get twitter friends : " + id);
+            }
+        });
+        result.addAll(profiles.values());
+        return result;
     }
 
     private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {

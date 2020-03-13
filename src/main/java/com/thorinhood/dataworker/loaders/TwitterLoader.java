@@ -7,6 +7,7 @@ import com.thorinhood.dataworker.services.db.TwitterDBService;
 import com.thorinhood.dataworker.tables.TwitterFriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
+import org.springframework.scheduling.annotation.Scheduled;
 
 public class TwitterLoader extends CommonLoader<TwitterDBService, TwitterTableRepo, TwitterFriendsTableRepo,
         TwitterTable, String, TwitterFriendsTable, TwitterFriendsPrimaryKey> {
@@ -15,11 +16,22 @@ public class TwitterLoader extends CommonLoader<TwitterDBService, TwitterTableRe
         super(dbService, twitterService, TwitterLoader.class);
     }
 
-//    @Scheduled(fixedDelay = 1 * 60 * 60 * 1000)
-//    public void loadData() {
-//        new Thread(() -> {
-//
-//        }).start();
-//    }
+    @Scheduled(fixedDelay = Long.MAX_VALUE)
+    public void loadData() {
+//        TwitterService twitterService = (TwitterService) service;
+//        for (;;) {
+//            try {
+//                Thread.sleep(20L);
+//                logger.info("tweets -> " + twitterService.getTwitter().timelineOperations().getUserTimeline("k160rg").toString());
+////                logger.info(""twitterService.getTwitter().friendOperations().getFriendIds("k160rg").toString());
+//            } catch(Exception exception) {
+//                logger.error("ERROR", exception);
+//            }
+//        }
+//        TwitterService twitterService = (TwitterService) service;
+//        long id = twitterService.getTwitter().userOperations().getUsers("k160rg").get(0).getId();
+//        logger.info("My id is : " + id);
+//        logger.info("GOT : " + dbService.findTwitterProfilesFromRelated());
+    }
 
 }

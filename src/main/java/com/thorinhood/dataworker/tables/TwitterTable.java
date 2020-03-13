@@ -1,17 +1,23 @@
 package com.thorinhood.dataworker.tables;
 
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Table("twitter")
 public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @PrimaryKey
+    private Long id;
+
+    @Column
     private String screenName;
 
     @Column
@@ -37,6 +43,23 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @Column
     private String profileImageUrl;
+
+    @Transient
+    private List<String> friends;
+
+    public TwitterTable setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public TwitterTable setFriends(List<String> friends) {
+        this.friends = friends;
+        return this;
+    }
 
     public TwitterTable setScreenName(String screenName) {
         this.screenName = screenName;
@@ -81,6 +104,10 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
     public TwitterTable setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
         return this;
+    }
+
+    public List<String> getFriends() {
+        return friends;
     }
 
     public String getScreenName() {
@@ -151,11 +178,16 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @Override
     public Collection<String> getLinked() {
-        return Collections.emptyList();
+        return friends;
     }
 
     @Override
     public List<TwitterFriendsTable> generatePairs() {
-        return null;
+        if (CollectionUtils.isEmpty(friends)) {
+            return Collections.emptyList();
+        }
+        return friends.stream()
+                .map(id -> new TwitterFriendsTable().setKey(getScreenName(), id))
+                .collect(Collectors.toList());
     }
 }

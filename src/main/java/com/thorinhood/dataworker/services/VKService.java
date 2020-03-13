@@ -15,6 +15,7 @@ import com.vk.api.sdk.objects.ServiceClientCredentialsFlowResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.users.UserField;
 import com.vk.api.sdk.queries.users.UsersNameCase;
+import com.vk.api.sdk.queries.wall.WallGetQuery;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,6 +85,10 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
     private ServiceActor serviceActor;
     private VKDBService dbService;
     private VKFriendsService vkFriendsService;
+
+    public WallGetQuery getVK() {
+        return vk.wall().get(serviceActor);
+    }
 
     public VKService(String vkServiceAccessKey,
                      String vkClientSecret,

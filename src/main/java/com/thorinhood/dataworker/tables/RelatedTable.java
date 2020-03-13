@@ -12,12 +12,12 @@ public class RelatedTable {
     @Id
     private UUID uid;
     @Column("vk_domain")
-    private String vkDomain;
+    private String vkDomain = "null";
     @Column("vk_id")
-    private String vkId;
-    private String twitter;
-    private String facebook;
-    private String instagram;
+    private String vkId = "null";
+    private String twitter = "null";
+    private String facebook = "null";
+    private String instagram = "null";
 
     public UUID getUid() {
         return uid;
@@ -49,26 +49,41 @@ public class RelatedTable {
     }
 
     public RelatedTable setVkDomain(String vkDomain) {
+        if (vkDomain == null) {
+            return this;
+        }
         this.vkDomain = vkDomain;
         return this;
     }
 
     public RelatedTable setVkId(String vkId) {
+        if (vkDomain == null) {
+            return this;
+        }
         this.vkId = vkId;
         return this;
     }
 
     public RelatedTable setTwitter(String twitter) {
+        if (vkDomain == null) {
+            return this;
+        }
         this.twitter = twitter;
         return this;
     }
 
     public RelatedTable setFacebook(String facebook) {
+        if (vkDomain == null) {
+            return this;
+        }
         this.facebook = facebook;
         return this;
     }
 
     public RelatedTable setInstagram(String instagram) {
+        if (vkDomain == null) {
+            return this;
+        }
         this.instagram = instagram;
         return this;
     }

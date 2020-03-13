@@ -1,34 +1,31 @@
 package com.thorinhood.dataworker.tables;
 
-import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("twitter_friends")
 public class TwitterFriendsTable implements FriendsPair {
 
-    @PrimaryKeyColumn(name = "first", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
-    private String first;
-
-    @PrimaryKeyColumn(name = "second", ordinal = 1, type = PrimaryKeyType.PARTITIONED)
-    private String second;
+    @PrimaryKey
+    private TwitterFriendsPrimaryKey key;
 
     public String getFirst() {
-        return first;
+        return key.getFirst();
     }
 
     public String getSecond() {
-        return second;
+        return key.getSecond();
     }
 
-    public TwitterFriendsTable setFirst(String first) {
-        this.first = first;
+    public TwitterFriendsTable setKey(String first, String second) {
+        key = new TwitterFriendsPrimaryKey()
+                .setFirst(first)
+                .setSecond(second);
         return this;
     }
 
-    public TwitterFriendsTable setSecond(String second) {
-        this.second = second;
-        return this;
+    public TwitterFriendsPrimaryKey getKey() {
+        return key;
     }
 
 }

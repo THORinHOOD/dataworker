@@ -42,7 +42,7 @@ public abstract class CommonLoader<
 
     public List<ID> loadData(List<ID> ids) {
         logger.info("Started to load and save profiles : " + ids.size());
-        List<ID> result = Lists.partition(ids, 200).stream()
+        List<ID> result = Lists.partition(ids, 25).stream()
             .flatMap(partition -> {
                 List<TABLE> users = service.getUsersInfo(partition);
                 List<ID> friends = users.stream()
