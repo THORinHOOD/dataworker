@@ -15,9 +15,6 @@ import java.util.stream.Collectors;
 public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @PrimaryKey
-    private Long id;
-
-    @Column
     private String screenName;
 
     @Column
@@ -46,15 +43,6 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @Transient
     private List<String> friends;
-
-    public TwitterTable setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
-    public Long getId() {
-        return id;
-    }
 
     public TwitterTable setFriends(List<String> friends) {
         this.friends = friends;

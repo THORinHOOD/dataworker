@@ -57,7 +57,7 @@ public class RelatedTable {
     }
 
     public RelatedTable setVkId(String vkId) {
-        if (vkDomain == null) {
+        if (vkId == null) {
             return this;
         }
         this.vkId = vkId;
@@ -65,7 +65,7 @@ public class RelatedTable {
     }
 
     public RelatedTable setTwitter(String twitter) {
-        if (vkDomain == null) {
+        if (twitter == null) {
             return this;
         }
         this.twitter = twitter;
@@ -73,7 +73,7 @@ public class RelatedTable {
     }
 
     public RelatedTable setFacebook(String facebook) {
-        if (vkDomain == null) {
+        if (facebook == null) {
             return this;
         }
         this.facebook = facebook;
@@ -81,10 +81,18 @@ public class RelatedTable {
     }
 
     public RelatedTable setInstagram(String instagram) {
-        if (vkDomain == null) {
+        if (instagram  == null) {
             return this;
         }
         this.instagram = instagram;
         return this;
+    }
+
+    public boolean isEmpty() {
+        return vkDomain.equalsIgnoreCase("null") &&
+               vkId.equalsIgnoreCase("null") &&
+               twitter.equalsIgnoreCase("null") &&
+               facebook.equalsIgnoreCase("null") &&
+               instagram.equalsIgnoreCase("null");
     }
 }

@@ -148,6 +148,7 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                     .setInstagram(table.instagram())
                     .setVkId(table.vkId())
                     .setVkDomain(table.vkDomain()))
+                .filter(x -> !x.isEmpty())
                 .collect(Collectors.toList());
     }
 

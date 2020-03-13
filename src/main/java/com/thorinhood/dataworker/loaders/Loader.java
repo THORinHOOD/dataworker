@@ -42,7 +42,7 @@ public class Loader {
         List<String> vkIds = Collections.singletonList("thorinhoodie");
         int depth = 1;
         while (depth-- > 0) {
-            logger.info("Start loading depth : " + depth + 1);
+            logger.info("Start loading depth : " + (depth + 1));
             vkIds = Lists.partition(vkIds, 25).stream()
                     .flatMap(partition -> {
                         List<VKTable> vkProfiles = vkService.getUsersInfo(partition);
@@ -64,7 +64,7 @@ public class Loader {
                         return friends.stream();
                     })
                     .collect(Collectors.toList());
-            logger.info("End loading depth : " + depth + 1);
+            logger.info("End loading depth : " + (depth + 1));
         }
     }
 

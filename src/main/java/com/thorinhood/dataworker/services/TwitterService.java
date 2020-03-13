@@ -39,8 +39,7 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
                 pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
                 pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
                 pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
-                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount),
-                pair("id", TwitterProfile::getId, TwitterTable::setId)
+                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
         );
 
         try {
@@ -67,16 +66,16 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
                 .stream()
                 .collect(Collectors.toMap(TwitterTable::getScreenName, Function.identity()));
         ArrayList<TwitterTable> result = new ArrayList<>();
-        profiles.keySet().forEach(id -> {
-            try {
-                result.addAll(convert(pairs, twitter.userOperations().getUsers(
-                    twitter.friendOperations().getFriendIds(id).stream().mapToLong(Long::longValue).toArray()
-                )));
-                profiles.get(id).setFriends(new ArrayList<>());
-            } catch(Exception exception) {
-                logger.error("Can't get twitter friends : " + id);
-            }
-        });
+//        profiles.keySet().forEach(id -> {
+//            try {
+//                result.addAll(convert(pairs, twitter.userOperations().getUsers(
+//                    twitter.friendOperations().getFriendIds(id).stream().mapToLong(Long::longValue).toArray()
+//                )));
+//                profiles.get(id).setFriends(new ArrayList<>());
+//            } catch(Exception exception) {
+//                logger.error("Can't get twitter friends : " + id);
+//            }
+//        });
         result.addAll(profiles.values());
         return result;
     }

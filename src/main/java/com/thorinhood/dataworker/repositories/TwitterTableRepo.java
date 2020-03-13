@@ -2,6 +2,8 @@ package com.thorinhood.dataworker.repositories;
 
 import com.thorinhood.dataworker.tables.TwitterTable;
 import org.springframework.data.cassandra.repository.CassandraRepository;
+import org.springframework.data.cassandra.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
