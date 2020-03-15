@@ -4,16 +4,11 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.FriendsPair;
-import com.thorinhood.dataworker.tables.FriendsPairsGenerator;
 import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
-import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
-import com.thorinhood.dataworker.tables.VKFriendsTable;
-import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.Finder;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
-import com.vk.api.sdk.actions.Friends;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +16,6 @@ import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -34,10 +28,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
