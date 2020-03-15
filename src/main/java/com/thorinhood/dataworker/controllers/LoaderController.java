@@ -51,6 +51,11 @@ public class LoaderController {
         return twitterDBService.countAllProfiles();
     }
 
+    @GetMapping("/vk/allProfiles/friends/count")
+    public long countFriendsVk() {
+        return vkdbService.countFriends();
+    }
+
     @GetMapping("/truncate")
     public void truncateAll() {
         vkdbService.truncateAll();
