@@ -27,7 +27,8 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterFriends
             String.class,
             relatedTableRepo,
             postgresJdbc,
-            TwitterDBService.class
+            TwitterDBService.class,
+            20
         );
     }
 

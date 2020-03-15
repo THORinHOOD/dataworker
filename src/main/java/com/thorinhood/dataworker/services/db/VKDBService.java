@@ -18,15 +18,16 @@ public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKTa
                        RelatedTableRepo relatedTableRepo,
                        JdbcTemplate postgresJdbc) {
         super(
-                vkTableRepo,
-                vkFriendsTableRepo,
-                cassandraTemplate,
-                "work.vk_unindexed",
-                "vk_need_friends",
-                String.class,
-                relatedTableRepo,
-                postgresJdbc,
-                VKDBService.class
+            vkTableRepo,
+            vkFriendsTableRepo,
+            cassandraTemplate,
+            "work.vk_unindexed",
+            "vk_need_friends",
+            String.class,
+            relatedTableRepo,
+            postgresJdbc,
+            VKDBService.class,
+            20
         );
     }
 

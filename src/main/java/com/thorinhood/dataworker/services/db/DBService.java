@@ -30,6 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -60,6 +64,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final JdbcTemplate postgresJdbc;
     protected final FRIENDSREPO friendsRepo;
     protected final List<Consumer<Collection<String>>> saveProfilesEvents;
+    protected final ExecutorService friendsExecutorService;
+    protected final int friendsThreads;
 
     public DBService(TABLEREPO tableRepo,
                      FRIENDSREPO friendsRepo,
@@ -69,7 +75,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                      Class<ID> idClass,
                      RelatedTableRepo relatedTableRepo,
                      JdbcTemplate postgresJdbc,
-                     Class dbServiceClass) {
+                     Class dbServiceClass,
+                     int friendsThreads) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
@@ -80,6 +87,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.postgresJdbc = postgresJdbc;
         this.friendsRepo = friendsRepo;
         this.saveProfilesEvents = new ArrayList<>();
+        friendsExecutorService = Executors.newFixedThreadPool(friendsThreads);
+        this.friendsThreads = friendsThreads;
     }
 
     public void subscribeOnSave(Consumer<Collection<String>> onSave) {
@@ -117,10 +126,27 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         Lists.partition(new ArrayList<>(profiles), 50).forEach(partition -> {
             measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving");
             measureTimeUtil.measure(() -> handleSaveEvent(partition), logger, "handle profiles saving");
-            measureTimeUtil.measure(() ->
-                Lists.partition(partition.stream()
-                        .flatMap(profile -> profile.generatePairs().stream())
-                        .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll), logger, "friends");
+            measureTimeUtil.measure(() -> {
+                List<TABLE_FRIENDS> friends = partition.stream()
+                    .flatMap(profile -> profile.generatePairs().stream())
+                    .collect(Collectors.toList());
+                List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, 1)).stream()
+                        .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
+                        .collect(Collectors.toList());
+                futures.forEach(x -> {
+                    try {
+                        x.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("Error [friends in future]", e);
+                    }
+                });
+            }, logger, "friends");
+
+
+//            measureTimeUtil.measure(() ->
+//                Lists.partition(partition.stream()
+//                        .flatMap(profile -> profile.generatePairs().stream())
+//                        .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll), logger, "friends");
             measureTimeUtil.measure(() -> relatedTableRepo.saveAll(actualize(convert(partition))), logger,
                     "related");
         });
