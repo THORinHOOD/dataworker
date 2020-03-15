@@ -4,6 +4,7 @@ import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.utils.common.BatchProfiles;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
+import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.util.CollectionUtils;
@@ -18,11 +19,23 @@ import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TwitterService extends SocialService<TwitterTable, String, TwitterFriendsTable> {
 
     private Twitter twitter;
+    private final List<FieldExtractor> pairs = List.of(
+            pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
+            pair("name", TwitterProfile::getName, TwitterTable::setName),
+            pair("profileImageUrl", TwitterProfile::getProfileImageUrl, TwitterTable::setProfileImageUrl),
+            pair("description", TwitterProfile::getDescription, TwitterTable::setDescription),
+            pair("location", TwitterProfile::getLocation, TwitterTable::setLocation),
+            pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
+            pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
+            pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
+            pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
+    );
 
     public TwitterService(Twitter twitter) {
         super(TwitterService.class);
@@ -34,24 +47,16 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
         if (CollectionUtils.isEmpty(users)) {
             return Collections.emptyList();
         }
-        List<FieldExtractor> pairs = List.of(
-                pair("screenName", TwitterProfile::getScreenName, TwitterTable::setScreenName),
-                pair("name", TwitterProfile::getName, TwitterTable::setName),
-                pair("profileImageUrl", TwitterProfile::getProfileImageUrl, TwitterTable::setProfileImageUrl),
-                pair("description", TwitterProfile::getDescription, TwitterTable::setDescription),
-                pair("location", TwitterProfile::getLocation, TwitterTable::setLocation),
-                pair("createdDate", x -> x.getCreatedDate().toString(), TwitterTable::setCreatedDate),
-                pair("language", TwitterProfile::getLanguage, TwitterTable::setLanguage),
-                pair("friendsCount", TwitterProfile::getFriendsCount, TwitterTable::setFriendsCount),
-                pair("followersCount", TwitterProfile::getFollowersCount, TwitterTable::setFollowersCount)
-        );
-
-        try {
-            return getUsersInfo(pairs, users);
-        } catch (Exception e) {
-            logger.error("While loading twitter profiles : " + users.toString(), e);
-            return Collections.emptyList();
-        }
+        Supplier<List<TwitterTable>> get = () -> {
+            List<TwitterTable> result = Collections.emptyList();
+            try {
+                result = getUsersInfo(pairs, users);
+            } catch(Exception e) {
+                logger.error("Error [twitter profiles loading] : " + users.toString(), e);
+            }
+            return result;
+        };
+        return (new MeasureTimeUtil()).measure(get, logger, "twitter profiles loading");
     }
 
     public Twitter getTwitter() {
@@ -60,7 +65,6 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
 
     public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames) throws InterruptedException {
-        logger.info("Start loading twitter profiles : " + userScreenNames.size());
         List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(String[]::new));
 
         Map<String, TwitterTable> profiles = convert(pairs, twitterProfiles)
@@ -78,7 +82,6 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
 //            }
 //        });
         result.addAll(profiles.values());
-        logger.info("Ended loading twitter profiles : " + userScreenNames.size());
         return result;
     }
 

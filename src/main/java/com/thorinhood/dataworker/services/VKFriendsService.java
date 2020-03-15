@@ -59,7 +59,6 @@ public class VKFriendsService {
     }
 
     public Map<String, List<String>> getFriends(List<String> ids) {
-        logger.info("Start loading friends : " + ids.size());
         List<Future<Pair<String, List<String>>>> futures = ids.stream()
                 .map(x -> executorService.submit(() -> getFriends(x)))
                 .collect(Collectors.toList());
@@ -69,7 +68,7 @@ public class VKFriendsService {
                     try {
                         friends = future.get();
                     } catch (Exception exception) {
-                        logger.error("While getting future friend", exception);
+                        logger.error("Error [getting future friend]", exception);
                     }
                     return friends;
                 })
@@ -103,7 +102,7 @@ public class VKFriendsService {
         }
 
         if (response == null || !response.getStatusCode().equals(HttpStatus.OK)) {
-            logger.error("Can't get friends of : " + id);
+            logger.error("Error [can't get friends] : " + id);
             return Pair.of(id, Collections.emptyList());
         }
 

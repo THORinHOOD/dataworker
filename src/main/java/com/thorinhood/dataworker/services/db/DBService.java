@@ -113,20 +113,16 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     }
 
     public void saveProfiles(Collection<TABLE> profiles) {
+        final MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
         Lists.partition(new ArrayList<>(profiles), 50).forEach(partition -> {
-            /*List<TABLE> toSave = partition.stream()
-                    .filter(table -> !tableRepo.existsById(table.id()))
-                    .collect(Collectors.toList());*/
-            tableRepo.saveAll(partition);
-            handleSaveEvent(partition);
-            Lists.partition(partition.stream()
-                    .flatMap(profile -> profile.generatePairs().stream())
-                    .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll);
-            logger.info("Start saving related : " + partition.size());
-            MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
-            measureTimeUtil.start();
-            relatedTableRepo.saveAll(actualize(convert(partition)));
-            logger.info("End saving related : " + partition.size() + " (" + measureTimeUtil.end("%d ms") + ")");
+            measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving");
+            measureTimeUtil.measure(() -> handleSaveEvent(partition), logger, "handle profiles saving");
+            measureTimeUtil.measure(() ->
+                Lists.partition(partition.stream()
+                        .flatMap(profile -> profile.generatePairs().stream())
+                        .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll), logger, "friends");
+            measureTimeUtil.measure(() -> relatedTableRepo.saveAll(actualize(convert(partition))), logger,
+                    "related");
         });
     }
 

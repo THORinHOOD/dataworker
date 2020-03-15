@@ -4,6 +4,7 @@ import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
+import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
@@ -112,24 +114,28 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
         if (CollectionUtils.isEmpty(userIds)) {
             return Collections.emptyList();
         }
-        try {
-            return getUsersInfo(
-                pairs,
-                Collections.singletonList(UserField.CONNECTIONS),
-                UsersNameCase.NOMINATIVE,
-                userIds
-            );
-        } catch (Exception e) {
-            logger.error("While getting users", e);
-            return Collections.emptyList();
-        }
+        Supplier<List<VKTable>> get = () -> {
+            List<VKTable> result = Collections.emptyList();
+            try {
+                result = getUsersInfo(
+                        pairs,
+                        Collections.singletonList(UserField.CONNECTIONS),
+                        UsersNameCase.NOMINATIVE,
+                        userIds
+                );
+            } catch (Exception e) {
+                logger.error("Error [vk profiles loading] : " + userIds.toString(), e);
+            }
+            return result;
+        };
+
+        return (new MeasureTimeUtil()).measure(get, logger, "vk profiles loading");
     }
 
     public List<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
                                             Collection<UserField> extra,
                                             UsersNameCase nameCase,
                                             List<String> userIds) throws ClientException, ApiException {
-        logger.info("Start loading vk profiles : " + userIds.size());
         List<UserField> fields = pairs.stream()
                 .filter(pair -> pair.containsAdditional(USER_FIELD))
                 .map(pair -> (UserField) pair.getAdditional(USER_FIELD))
@@ -155,9 +161,9 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
         result.values().forEach(VKDataUtil::extractLinks);
-        vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
-                .forEach((id, friends) -> result.get(id).setFriends(friends));
-        logger.info("Ended loading vk profiles : " + userIds.size());
+        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
+        measureTimeUtil.measure(() -> vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
+            .forEach((id, friends) -> result.get(id).setFriends(friends)), logger, "vk get friends");
         return new ArrayList<>(result.values());
     }
 

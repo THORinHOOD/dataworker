@@ -2,8 +2,8 @@ package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.FriendsPair;
 import com.thorinhood.dataworker.tables.Profile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public abstract class SocialService<
     protected final Logger logger;
 
     protected SocialService(Class serviceClass) {
-        logger = LogManager.getLogger(serviceClass);
+        logger = LoggerFactory.getLogger(serviceClass);
     }
 
     public abstract List<TABLE> getUsersInfo(List<ID> ids);
