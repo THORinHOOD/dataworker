@@ -62,7 +62,7 @@ public class TwitterFriendsMaker {
     private Map<RelatedTable, List<String>> getVkFriends(Stream<RelatedTable> relatedTables) {
         return relatedTables.collect(Collectors.toMap(
                 Function.identity(),
-                relatedTable -> vkFriendsTableRepo.findAllByFirst(relatedTable.getVkDomain())
+                relatedTable -> vkFriendsTableRepo.searchByFirst(relatedTable.getVkDomain())
                     .stream()
                     .map(VKFriendsTable::getSecond)
                     .collect(Collectors.toList())
