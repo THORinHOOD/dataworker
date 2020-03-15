@@ -29,7 +29,7 @@ public class TwitterConfiguration {
     @Value("${twitter.access.token.secret}")
     private String accessTokenSecret;
 
-    @Value("twitter.db.service.friends.threads")
+    @Value("${twitter.db.service.friends.threads}")
     private Integer dbServiceFriendsThreadsCount;
 
 //    @Bean
