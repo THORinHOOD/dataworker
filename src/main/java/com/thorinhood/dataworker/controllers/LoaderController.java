@@ -42,7 +42,13 @@ public class LoaderController {
         this.twitterDBService = twitterDBService;
     }
 
-    @GetMapping("/vk/canstart")
+    @GetMapping("/truncate")
+    public void truncateAll() {
+        vkdbService.truncateAll();
+        twitterDBService.truncateAll();
+    }
+
+    @GetMapping("/canstart")
     public boolean canStart() {
         return !executing;
     }

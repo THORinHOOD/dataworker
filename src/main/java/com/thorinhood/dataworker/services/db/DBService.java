@@ -60,7 +60,6 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final FRIENDSREPO friendsRepo;
     protected final List<Consumer<Collection<String>>> saveProfilesEvents;
 
-
     public DBService(TABLEREPO tableRepo,
                      FRIENDSREPO friendsRepo,
                      CassandraTemplate cassandraTemplate,
@@ -171,6 +170,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 
     private String batch(Collection<ID> ids) {
         return ids.stream().map(x -> "(\'" + x + "\')").collect(Collectors.joining(","));
+    }
+
+    public void truncateAll() {
+        tableRepo.deleteAll();
+        relatedTableRepo.deleteAll();
+        friendsRepo.deleteAll();
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
