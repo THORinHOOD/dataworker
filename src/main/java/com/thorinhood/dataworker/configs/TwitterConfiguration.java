@@ -1,6 +1,10 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.services.TwitterService;
+import com.thorinhood.dataworker.services.db.TwitterDBService;
+import com.thorinhood.dataworker.services.db.TwitterProfilesCache;
+import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.services.db.VKProfilesCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +44,11 @@ public class TwitterConfiguration {
     @Bean
     public TwitterService twitterService(Twitter twitter) {
         return new TwitterService(twitter);
+    }
+
+    @Bean
+    public TwitterProfilesCache twitterProfilesCache(TwitterDBService twitterDBService) {
+        return new TwitterProfilesCache(twitterDBService);
     }
 
 }

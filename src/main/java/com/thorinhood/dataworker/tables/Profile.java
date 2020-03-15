@@ -7,5 +7,6 @@ public interface Profile<ID, FRIENDS_TABLE extends FriendsPair> extends HasId<ID
 
     Collection<ID> getLinked();
     List<FRIENDS_TABLE> generatePairs();
+    String getId();
 
 }

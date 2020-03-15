@@ -178,4 +178,10 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
                 .map(id -> new TwitterFriendsTable().setKey(getScreenName(), id))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public String getId() {
+        return screenName;
+    }
+
 }

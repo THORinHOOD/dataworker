@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     protected final RelatedTableRepo relatedTableRepo;
     protected final JdbcTemplate postgresJdbc;
     protected final FRIENDSREPO friendsRepo;
+    protected final List<Consumer<Collection<String>>> saveProfilesEvents;
+
 
     public DBService(TABLEREPO tableRepo,
                      FRIENDSREPO friendsRepo,
@@ -76,6 +79,11 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         logger = LoggerFactory.getLogger(dbServiceClass);
         this.postgresJdbc = postgresJdbc;
         this.friendsRepo = friendsRepo;
+        this.saveProfilesEvents = new ArrayList<>();
+    }
+
+    public void subscribeOnSave(Consumer<Collection<String>> onSave) {
+        saveProfilesEvents.add(onSave);
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -97,11 +105,20 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         }
     }
 
+    private void handleSaveEvent(Collection<TABLE> savedTables) {
+        Collection<String> ids = savedTables.stream()
+                .map(Profile::getId)
+                .collect(Collectors.toList());
+        saveProfilesEvents.forEach(eventHandler -> eventHandler.accept(ids));
+    }
+
     public void saveProfiles(Collection<TABLE> profiles) {
         Lists.partition(new ArrayList<>(profiles), 50).forEach(partition -> {
-            tableRepo.saveAll(partition.stream()
+            /*List<TABLE> toSave = partition.stream()
                     .filter(table -> !tableRepo.existsById(table.id()))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());*/
+            tableRepo.saveAll(partition);
+            handleSaveEvent(partition);
             Lists.partition(partition.stream()
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll);

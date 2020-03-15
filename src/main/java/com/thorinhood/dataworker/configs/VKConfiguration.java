@@ -2,7 +2,9 @@ package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.services.VKFriendsService;
 import com.thorinhood.dataworker.services.VKService;
+import com.thorinhood.dataworker.services.db.ProfilesCache;
 import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.services.db.VKProfilesCache;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,11 @@ public class VKConfiguration {
     @Bean
     public VKFriendsService vkFriendsService() {
         return new VKFriendsService(vkFriendsServiceThreadsCount);
+    }
+
+    @Bean
+    public VKProfilesCache vkProfilesCahce(VKDBService vkdbService) {
+        return new VKProfilesCache(vkdbService);
     }
 
 }
