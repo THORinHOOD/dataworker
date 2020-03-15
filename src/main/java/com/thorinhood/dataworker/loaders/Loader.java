@@ -3,10 +3,10 @@ package com.thorinhood.dataworker.loaders;
 import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.services.VKService;
-import com.thorinhood.dataworker.services.db.TwitterDBService;
-import com.thorinhood.dataworker.services.cache.TwitterProfilesCache;
-import com.thorinhood.dataworker.services.db.VKDBService;
-import com.thorinhood.dataworker.services.cache.VKProfilesCache;
+import com.thorinhood.dataworker.db.TwitterDBService;
+import com.thorinhood.dataworker.cache.TwitterProfilesCache;
+import com.thorinhood.dataworker.db.VKDBService;
+import com.thorinhood.dataworker.cache.VKProfilesCache;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
@@ -50,7 +50,8 @@ public class Loader {
             .filter(x -> !vkProfilesCache.contains(x))
             .collect(Collectors.toList());
         while (depth-- > 0) {
-            vkIds = measureTimeUtil.measure(this::loadNext, vkIds, logger, "loading vk depth " + (depth + 1));
+            vkIds = measureTimeUtil.measure(this::loadNext, vkIds, logger, "loading vk depth " + (depth + 1),
+                    vkIds.size());
         }
     }
 

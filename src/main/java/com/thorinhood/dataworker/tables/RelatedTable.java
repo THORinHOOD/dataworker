@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Table("related_profiles")
@@ -94,5 +95,22 @@ public class RelatedTable {
                twitter.equalsIgnoreCase("null") &&
                facebook.equalsIgnoreCase("null") &&
                instagram.equalsIgnoreCase("null");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RelatedTable that = (RelatedTable) o;
+        return Objects.equals(vkDomain, that.vkDomain) &&
+               Objects.equals(vkId, that.vkId) &&
+               Objects.equals(twitter, that.twitter) &&
+               Objects.equals(facebook, that.facebook) &&
+               Objects.equals(instagram, that.instagram);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vkDomain, vkId, twitter, facebook, instagram);
     }
 }

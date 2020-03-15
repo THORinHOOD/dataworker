@@ -2,7 +2,7 @@ package com.thorinhood.dataworker.loaders;
 
 import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.services.SocialService;
-import com.thorinhood.dataworker.services.db.DBService;
+import com.thorinhood.dataworker.db.DBService;
 import com.thorinhood.dataworker.tables.FriendsPair;
 import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.Profile;

@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.services.db;
+package com.thorinhood.dataworker.db;
 
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;

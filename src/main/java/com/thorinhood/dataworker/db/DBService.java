@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.services.db;
+package com.thorinhood.dataworker.db;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.collect.Lists;
@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,6 +85,10 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         this.friendsThreads = friendsThreads;
     }
 
+    public Slice<TABLE> findAll(Pageable pageable) {
+        return tableRepo.findAll(pageable);
+    }
+
     public void subscribeOnSave(Consumer<Collection<String>> onSave) {
         saveProfilesEvents.add(onSave);
     }
@@ -115,13 +121,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 
     public void saveProfiles(Collection<TABLE> profiles) {
         final MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
-        Lists.partition(new ArrayList<>(profiles), 50).forEach(partition -> {
-            measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving");
-            measureTimeUtil.measure(() -> handleSaveEvent(partition), logger, "handle profiles saving");
-            measureTimeUtil.measure(() -> {
-                List<TABLE_FRIENDS> friends = partition.stream()
+        Lists.partition(new ArrayList<>(profiles), 100).forEach(partition -> {
+            measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving", partition.size());
+            List<TABLE_FRIENDS> friends = partition.stream()
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList());
+            measureTimeUtil.measure(() -> {
                 List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, 1)).stream()
                     .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
                     .collect(Collectors.toList());
@@ -132,16 +137,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                         logger.error("Error [friends in future]", e);
                     }
                 });
-            }, logger, "friends");
-
-
-//            measureTimeUtil.measure(() ->
-//                Lists.partition(partition.stream()
-//                        .flatMap(profile -> profile.generatePairs().stream())
-//                        .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll), logger, "friends");
-            measureTimeUtil.measure(() -> relatedTableRepo.saveAll(actualize(convert(partition))), logger,
-                    "related");
+            }, logger, "friends saving", friends.size());
+            Collection<RelatedTable> relatedTables = actualize(convert(partition));
+            measureTimeUtil.measure(() -> relatedTableRepo.saveAll(relatedTables), logger,
+                    "related", relatedTables.size());
         });
+        measureTimeUtil.measure(() -> handleSaveEvent(profiles), logger, "handle profiles saving", profiles.size());
     }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {

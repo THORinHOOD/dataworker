@@ -1,6 +1,6 @@
 package com.thorinhood.dataworker.services;
 
-import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
@@ -129,7 +129,7 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
             return result;
         };
 
-        return (new MeasureTimeUtil()).measure(get, logger, "vk profiles loading");
+        return (new MeasureTimeUtil()).measure(get, logger, "vk profiles loading", userIds.size());
     }
 
     public List<VKTable> getUsersInfo(Collection<FieldExtractor> pairs,
@@ -163,7 +163,8 @@ public class VKService extends SocialService<VKTable, String, VKFriendsTable> {
         result.values().forEach(VKDataUtil::extractLinks);
         MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
         measureTimeUtil.measure(() -> vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
-            .forEach((id, friends) -> result.get(id).setFriends(friends)), logger, "vk get friends");
+            .forEach((id, friends) -> result.get(id).setFriends(friends)), logger, "vk get friends",
+            result.keySet().size());
         return new ArrayList<>(result.values());
     }
 

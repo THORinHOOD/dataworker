@@ -3,7 +3,7 @@ package com.thorinhood.dataworker.loaders;
 import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.services.VKService;
-import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.scheduling.annotation.Scheduled;

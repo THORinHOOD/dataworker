@@ -1,6 +1,6 @@
-package com.thorinhood.dataworker.services.parser;
+package com.thorinhood.dataworker.parser;
 
-import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.db.VKDBService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 

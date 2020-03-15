@@ -1,14 +1,13 @@
 package com.thorinhood.dataworker.configs;
 
+import com.thorinhood.dataworker.cache.StringCache;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
-import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
-import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.services.VKFriendsService;
 import com.thorinhood.dataworker.services.VKService;
-import com.thorinhood.dataworker.services.db.VKDBService;
-import com.thorinhood.dataworker.services.cache.VKProfilesCache;
+import com.thorinhood.dataworker.db.VKDBService;
+import com.thorinhood.dataworker.cache.VKProfilesCache;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +50,11 @@ public class VKConfiguration {
     @Bean
     public VKProfilesCache vkProfilesCahce(VKDBService vkdbService) {
         return new VKProfilesCache(vkdbService);
+    }
+
+    @Bean(name = "vkFriendsMakerCache")
+    public StringCache vkFriendsMakerCache() {
+        return new StringCache("vk friends maker cache");
     }
 
     @Bean

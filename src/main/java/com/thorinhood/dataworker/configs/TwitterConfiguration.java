@@ -1,11 +1,14 @@
 package com.thorinhood.dataworker.configs;
 
+import com.thorinhood.dataworker.cache.StringCache;
+import com.thorinhood.dataworker.cache.TwitterProfilesCache;
+import com.thorinhood.dataworker.db.TwitterDBService;
+import com.thorinhood.dataworker.jobs.TwitterFriendsMaker;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
+import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
-import com.thorinhood.dataworker.services.db.TwitterDBService;
-import com.thorinhood.dataworker.services.cache.TwitterProfilesCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +55,21 @@ public class TwitterConfiguration {
     @Bean
     public TwitterProfilesCache twitterProfilesCache(TwitterDBService twitterDBService) {
         return new TwitterProfilesCache(twitterDBService);
+    }
+
+    @Bean(name = "twitterFriendsMakerCache")
+    public StringCache twitterFriendsMakerCache() {
+        return new StringCache("twitter friends maker cache");
+    }
+
+    @Bean
+    public TwitterFriendsMaker twitterFriendsMaker(TwitterProfilesCache twitterProfilesCache,
+                                                   RelatedTableRepo relatedTableRepo,
+                                                   VKFriendsTableRepo vkFriendsTableRepo,
+                                                   TwitterFriendsTableRepo twitterFriendsTableRepo
+                                                   ) {
+        return new TwitterFriendsMaker(twitterProfilesCache, relatedTableRepo, vkFriendsTableRepo,
+                twitterFriendsTableRepo);
     }
 
     @Bean

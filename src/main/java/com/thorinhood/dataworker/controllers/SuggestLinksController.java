@@ -1,8 +1,7 @@
 package com.thorinhood.dataworker.controllers;
 
-import com.thorinhood.dataworker.loaders.Loader;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
-import com.thorinhood.dataworker.services.db.VKDBService;
+import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.RelatedTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController

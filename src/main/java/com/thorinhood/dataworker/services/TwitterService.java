@@ -56,7 +56,7 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
             }
             return result;
         };
-        return (new MeasureTimeUtil()).measure(get, logger, "twitter profiles loading");
+        return (new MeasureTimeUtil()).measure(get, logger, "twitter profiles loading", users.size());
     }
 
     public Twitter getTwitter() {
@@ -65,24 +65,12 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
 
     public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames) throws InterruptedException {
-        List<TwitterProfile> twitterProfiles = twitter.userOperations().getUsers(userScreenNames.toArray(String[]::new));
-
+        List<TwitterProfile> twitterProfiles = twitter.userOperations()
+                .getUsers(userScreenNames.toArray(String[]::new));
         Map<String, TwitterTable> profiles = convert(pairs, twitterProfiles)
                 .stream()
                 .collect(Collectors.toMap(TwitterTable::getScreenName, Function.identity()));
-        ArrayList<TwitterTable> result = new ArrayList<>();
-//        profiles.keySet().forEach(id -> {
-//            try {
-//                result.addAll(convert(pairs, twitter.userOperations().getUsers(
-//                    twitter.friendOperations().getFriendIds(id).stream().mapToLong(Long::longValue).toArray()
-//                )));
-//                profiles.get(id).setFriends(new ArrayList<>());
-//            } catch(Exception exception) {
-//                logger.error("Can't get twitter friends : " + id);
-//            }
-//        });
-        result.addAll(profiles.values());
-        return result;
+        return new ArrayList<>(profiles.values());
     }
 
     private Collection<TwitterTable> convert(Collection<FieldExtractor> pairs, Collection<TwitterProfile> profiles) {
@@ -98,8 +86,8 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
     }
 
     private <TYPE> FieldExtractor<TwitterProfile, TwitterTable, TYPE> pair(String key,
-                                                                      Function<TwitterProfile, TYPE> extractor,
-                                                                      BiConsumer<TwitterTable, TYPE> setter) {
+                                                                           Function<TwitterProfile, TYPE> extractor,
+                                                                           BiConsumer<TwitterTable, TYPE> setter) {
         return FieldExtractor.<TwitterProfile, TwitterTable, TYPE>newBuilder()
                 .setSetter(setter)
                 .setExtractor(extractor)

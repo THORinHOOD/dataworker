@@ -3,7 +3,7 @@ package com.thorinhood.dataworker.loaders;
 import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
-import com.thorinhood.dataworker.services.db.TwitterDBService;
+import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import org.springframework.scheduling.annotation.Scheduled;
