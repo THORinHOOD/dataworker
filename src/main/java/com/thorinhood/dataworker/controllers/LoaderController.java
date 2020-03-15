@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 @RestController
 @RequestMapping("/loader")
@@ -40,6 +39,16 @@ public class LoaderController {
         this.twitterService = twitterService;
         this.vkdbService = vkdbService;
         this.twitterDBService = twitterDBService;
+    }
+
+    @GetMapping("/vk/allProfiles/count")
+    public long countVk() {
+        return vkdbService.countAllProfiles();
+    }
+
+    @GetMapping("/twitter/allProfiles/count")
+    public long countTwitter() {
+        return twitterDBService.countAllProfiles();
     }
 
     @GetMapping("/truncate")

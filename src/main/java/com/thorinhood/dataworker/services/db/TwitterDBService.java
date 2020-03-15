@@ -3,7 +3,6 @@ package com.thorinhood.dataworker.services.db;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
-import com.thorinhood.dataworker.tables.TwitterFriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TwitterDBService extends DBService<TwitterTableRepo, TwitterFriendsTableRepo, TwitterTable, String,
-        TwitterFriendsTable, TwitterFriendsPrimaryKey> {
+        TwitterFriendsTable> {
 
     public TwitterDBService(TwitterTableRepo twitterTableRepo,
                             TwitterFriendsTableRepo twitterFriendsTableRepo,

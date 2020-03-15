@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.services.SocialService;
 import com.thorinhood.dataworker.services.db.DBService;
 import com.thorinhood.dataworker.tables.FriendsPair;
+import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.Profile;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -18,13 +19,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class CommonLoader<
-        DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE, FRIENDS_KEY>,
+        DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE>,
         TABLEREPO extends CassandraRepository<TABLE, ID>,
-        FRIENDSREPO extends CassandraRepository<FRIENDS_TABLE, FRIENDS_KEY>,
+        FRIENDSREPO extends CassandraRepository<FRIENDS_TABLE, FriendsPrimaryKey>,
         TABLE extends Profile<ID, FRIENDS_TABLE>,
         ID,
-        FRIENDS_TABLE extends FriendsPair,
-        FRIENDS_KEY> {
+        FRIENDS_TABLE extends FriendsPair> {
 
     private final static int THREADS_COUNT = 30;
     protected final Logger logger;

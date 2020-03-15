@@ -7,7 +7,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 public class TwitterFriendsTable implements FriendsPair {
 
     @PrimaryKey
-    private TwitterFriendsPrimaryKey key;
+    private FriendsPrimaryKey key;
 
     public String getFirst() {
         return key.getFirst();
@@ -18,13 +18,13 @@ public class TwitterFriendsTable implements FriendsPair {
     }
 
     public TwitterFriendsTable setKey(String first, String second) {
-        key = new TwitterFriendsPrimaryKey()
-                .setFirst(first)
-                .setSecond(second);
+        key = new FriendsPrimaryKey()
+            .setFirst(first)
+            .setSecond(second);
         return this;
     }
 
-    public TwitterFriendsPrimaryKey getKey() {
+    public FriendsPrimaryKey getKey() {
         return key;
     }
 

@@ -7,7 +7,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 public class VKFriendsTable implements FriendsPair {
 
     @PrimaryKey
-    private VKFriendsPrimaryKey key;
+    private FriendsPrimaryKey key;
 
     public String getFirst() {
         return key.getFirst();
@@ -18,13 +18,13 @@ public class VKFriendsTable implements FriendsPair {
     }
 
     public VKFriendsTable setKey(String first, String second) {
-        key = new VKFriendsPrimaryKey()
-                .setFirst(first)
-                .setSecond(second);
+        key = new FriendsPrimaryKey()
+            .setFirst(first)
+            .setSecond(second);
         return this;
     }
 
-    public VKFriendsPrimaryKey getKey() {
+    public FriendsPrimaryKey getKey() {
         return key;
     }
 

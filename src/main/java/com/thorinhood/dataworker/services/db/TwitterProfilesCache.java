@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
-public class TwitterProfilesCache extends ProfilesCache {
+public class TwitterProfilesCache extends CacheService<String> {
 
     private static final Logger logger = LoggerFactory.getLogger(TwitterProfilesCache.class);
 
@@ -23,6 +23,11 @@ public class TwitterProfilesCache extends ProfilesCache {
     @Override
     public boolean contains(String id) {
         return cache.contains(id);
+    }
+
+    @Override
+    boolean additionalFilterCondition(String object) {
+        return !object.equalsIgnoreCase("null");
     }
 
 }

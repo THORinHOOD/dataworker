@@ -3,7 +3,6 @@ package com.thorinhood.dataworker.services.db;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
-import com.thorinhood.dataworker.tables.VKFriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
@@ -11,8 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKTable, String, VKFriendsTable,
-        VKFriendsPrimaryKey> {
+public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKTable, String, VKFriendsTable> {
 
     public VKDBService(VKTableRepo vkTableRepo,
                        VKFriendsTableRepo vkFriendsTableRepo,

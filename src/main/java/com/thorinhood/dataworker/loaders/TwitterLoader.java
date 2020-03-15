@@ -4,13 +4,12 @@ import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.services.db.TwitterDBService;
-import com.thorinhood.dataworker.tables.TwitterFriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public class TwitterLoader extends CommonLoader<TwitterDBService, TwitterTableRepo, TwitterFriendsTableRepo,
-        TwitterTable, String, TwitterFriendsTable, TwitterFriendsPrimaryKey> {
+        TwitterTable, String, TwitterFriendsTable> {
 
     public TwitterLoader(TwitterDBService dbService, TwitterService twitterService) {
         super(dbService, twitterService, TwitterLoader.class);

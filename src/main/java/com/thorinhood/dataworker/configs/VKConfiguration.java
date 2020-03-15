@@ -2,7 +2,6 @@ package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.services.VKFriendsService;
 import com.thorinhood.dataworker.services.VKService;
-import com.thorinhood.dataworker.services.db.ProfilesCache;
 import com.thorinhood.dataworker.services.db.VKDBService;
 import com.thorinhood.dataworker.services.db.VKProfilesCache;
 import com.vk.api.sdk.exceptions.ApiException;

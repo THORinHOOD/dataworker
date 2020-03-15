@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.FriendsPair;
 import com.thorinhood.dataworker.tables.FriendsPairsGenerator;
+import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.HasId;
 import com.thorinhood.dataworker.tables.Profile;
 import com.thorinhood.dataworker.tables.RelatedTable;
@@ -35,11 +36,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                FRIENDSREPO extends CassandraRepository<TABLE_FRIENDS, FRIENDS_KEY>,
+                                FRIENDSREPO extends CassandraRepository<TABLE_FRIENDS, FriendsPrimaryKey>,
                                 TABLE extends Profile<ID, TABLE_FRIENDS>,
                                 ID,
-                                TABLE_FRIENDS extends FriendsPair,
-                                FRIENDS_KEY> {
+                                TABLE_FRIENDS extends FriendsPair> {
 
     private static final Collection<BiFunction<RelatedTableRepo, RelatedTable, RelatedTable>> findExistFunctions = Arrays.asList(
         (repo, table) -> Finder.findByStringValue(repo, table, RelatedTable::getVkId, RelatedTableRepo::findByVkId),
@@ -170,6 +170,10 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
 
     private String batch(Collection<ID> ids) {
         return ids.stream().map(x -> "(\'" + x + "\')").collect(Collectors.joining(","));
+    }
+
+    public long countAllProfiles() {
+        return tableRepo.count();
     }
 
     public void truncateAll() {
