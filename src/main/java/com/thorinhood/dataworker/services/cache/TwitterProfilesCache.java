@@ -1,5 +1,6 @@
-package com.thorinhood.dataworker.services.db;
+package com.thorinhood.dataworker.services.cache;
 
+import com.thorinhood.dataworker.services.db.TwitterDBService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

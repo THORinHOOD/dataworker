@@ -3,7 +3,7 @@ package com.thorinhood.dataworker.configs;
 import com.thorinhood.dataworker.services.VKFriendsService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.services.db.VKDBService;
-import com.thorinhood.dataworker.services.db.VKProfilesCache;
+import com.thorinhood.dataworker.services.cache.VKProfilesCache;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import org.springframework.beans.factory.annotation.Value;

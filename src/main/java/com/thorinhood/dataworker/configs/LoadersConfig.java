@@ -1,14 +1,12 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.loaders.Loader;
-import com.thorinhood.dataworker.loaders.TwitterLoader;
-import com.thorinhood.dataworker.loaders.VKLoader;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.services.db.TwitterDBService;
-import com.thorinhood.dataworker.services.db.TwitterProfilesCache;
+import com.thorinhood.dataworker.services.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.services.db.VKDBService;
-import com.thorinhood.dataworker.services.db.VKProfilesCache;
+import com.thorinhood.dataworker.services.cache.VKProfilesCache;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

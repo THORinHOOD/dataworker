@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.services.db;
+package com.thorinhood.dataworker.services.cache;
 
 import org.apache.commons.collections4.CollectionUtils;
 

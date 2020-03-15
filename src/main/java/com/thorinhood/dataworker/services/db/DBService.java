@@ -12,6 +12,7 @@ import com.thorinhood.dataworker.tables.RelatedTable;
 import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import com.thorinhood.dataworker.utils.common.Finder;
+import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.vk.api.sdk.actions.Friends;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -121,7 +122,11 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
             Lists.partition(partition.stream()
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList()), 50).forEach(friendsRepo::saveAll);
+            logger.info("Start saving related : " + partition.size());
+            MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
+            measureTimeUtil.start();
             relatedTableRepo.saveAll(actualize(convert(partition)));
+            logger.info("End saving related : " + partition.size() + " (" + measureTimeUtil.end("%d ms") + ")");
         });
     }
 
