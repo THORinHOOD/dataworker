@@ -7,16 +7,15 @@ import com.thorinhood.dataworker.tables.VKFriendsTable;
 import com.thorinhood.dataworker.tables.VKTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 
-@Service
 public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKTable, String, VKFriendsTable> {
 
     public VKDBService(VKTableRepo vkTableRepo,
                        VKFriendsTableRepo vkFriendsTableRepo,
                        CassandraTemplate cassandraTemplate,
                        RelatedTableRepo relatedTableRepo,
-                       JdbcTemplate postgresJdbc) {
+                       JdbcTemplate postgresJdbc,
+                       int dbServiceFriendsThreads) {
         super(
             vkTableRepo,
             vkFriendsTableRepo,
@@ -27,7 +26,7 @@ public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKTa
             relatedTableRepo,
             postgresJdbc,
             VKDBService.class,
-            20
+            dbServiceFriendsThreads
         );
     }
 

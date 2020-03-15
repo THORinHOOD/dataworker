@@ -7,9 +7,7 @@ import com.thorinhood.dataworker.tables.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.TwitterTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TwitterDBService extends DBService<TwitterTableRepo, TwitterFriendsTableRepo, TwitterTable, String,
         TwitterFriendsTable> {
 
@@ -17,7 +15,8 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterFriends
                             TwitterFriendsTableRepo twitterFriendsTableRepo,
                             CassandraTemplate cassandraTemplate,
                             RelatedTableRepo relatedTableRepo,
-                            JdbcTemplate postgresJdbc) {
+                            JdbcTemplate postgresJdbc,
+                            int dbTwitterFriendsThreads) {
         super(
             twitterTableRepo,
             twitterFriendsTableRepo,
@@ -28,7 +27,7 @@ public class TwitterDBService extends DBService<TwitterTableRepo, TwitterFriends
             relatedTableRepo,
             postgresJdbc,
             TwitterDBService.class,
-            20
+            dbTwitterFriendsThreads
         );
     }
 
