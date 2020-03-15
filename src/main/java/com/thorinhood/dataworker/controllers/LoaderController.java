@@ -41,21 +41,6 @@ public class LoaderController {
         this.twitterDBService = twitterDBService;
     }
 
-    @GetMapping("/vk/allProfiles/count")
-    public long countVk() {
-        return vkdbService.countAllProfiles();
-    }
-
-    @GetMapping("/twitter/allProfiles/count")
-    public long countTwitter() {
-        return twitterDBService.countAllProfiles();
-    }
-
-    @GetMapping("/vk/allProfiles/friends/count")
-    public long countFriendsVk() {
-        return vkdbService.countFriends();
-    }
-
     @GetMapping("/truncate")
     public void truncateAll() {
         vkdbService.truncateAll();
@@ -92,7 +77,5 @@ public class LoaderController {
             });
         }
     }
-
-
 
 }
