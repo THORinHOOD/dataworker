@@ -123,8 +123,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList());
                 List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, 1)).stream()
-                        .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
-                        .collect(Collectors.toList());
+                    .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
+                    .collect(Collectors.toList());
                 futures.forEach(x -> {
                     try {
                         x.get();
