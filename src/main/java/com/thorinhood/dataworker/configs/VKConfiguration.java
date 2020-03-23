@@ -1,9 +1,9 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.cache.StringCache;
-import com.thorinhood.dataworker.repositories.RelatedTableRepo;
-import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
-import com.thorinhood.dataworker.repositories.VKTableRepo;
+import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
+import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.profiles.VKTableRepo;
 import com.thorinhood.dataworker.services.VKFriendsService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.VKDBService;

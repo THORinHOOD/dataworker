@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.repositories;
+package com.thorinhood.dataworker.repositories.friends;
 
 import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.friends.VKFriendsTable;

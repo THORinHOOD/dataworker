@@ -1,6 +1,6 @@
 package com.thorinhood.dataworker.controllers;
 
-import com.thorinhood.dataworker.repositories.RelatedTableRepo;
+import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;

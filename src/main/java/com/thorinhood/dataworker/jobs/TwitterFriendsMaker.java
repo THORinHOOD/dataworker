@@ -1,9 +1,9 @@
 package com.thorinhood.dataworker.jobs;
 
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
-import com.thorinhood.dataworker.repositories.RelatedTableRepo;
-import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
-import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
+import com.thorinhood.dataworker.repositories.friends.TwitterFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.friends.VKFriendsTable;

@@ -1,12 +1,14 @@
 package com.thorinhood.dataworker.loaders;
 
 import com.google.common.collect.Lists;
+import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.cache.VKProfilesCache;
+import com.thorinhood.dataworker.tables.posts.VKPostsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
@@ -18,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,39 +37,51 @@ public class Loader {
     private final TwitterDBService twitterDBService;
     private final VKProfilesCache vkProfilesCache;
     private final TwitterProfilesCache twitterProfilesCache;
+    private final VKPostsTableRepo vkPostsTableRepo;
+    private final MeasureTimeUtil measureTimeUtil;
 
     public Loader(VKService vkService,
                   TwitterService twitterService,
                   VKDBService vkdbService,
                   TwitterDBService twitterDBService,
                   VKProfilesCache vkProfilesCache,
-                  TwitterProfilesCache twitterProfilesCache) {
+                  TwitterProfilesCache twitterProfilesCache,
+                  VKPostsTableRepo vkPostsTableRepo) {
         this.vkService = vkService;
         this.twitterService = twitterService;
         this.vkdbService = vkdbService;
         this.twitterDBService = twitterDBService;
         this.twitterProfilesCache = twitterProfilesCache;
         this.vkProfilesCache = vkProfilesCache;
+        this.vkPostsTableRepo = vkPostsTableRepo;
+        measureTimeUtil = new MeasureTimeUtil();
     }
 
     @Scheduled(fixedRate = Long.MAX_VALUE)
     public void kek() {
-        long loaded = 0;
-        for (;;) {
-            try {
-                GetResponse getResponse = vkService.getVK()
-                        .domain("thorinhoodie")
-                        .execute();
-                loaded += getResponse.getCount();
-                logger.info(String.format("loaded : %d", loaded));
-            } catch (ApiException | ClientException e) {
-                logger.error(String.format("When loading next posts [loaded : %d]", loaded), e);
-            }
-        }
+//        long loaded = 0;
+//        for (;;) {
+//            try {
+//                GetResponse getResponse = vkService.getVK()
+//                        .domain("thorinhoodie")
+//                        .execute();
+//                getResponse.getItems().get(0).getId
+//                loaded += getResponse.getCount();
+//                logger.info(String.format("loaded : %d", loaded));
+//            } catch (ApiException | ClientException e) {
+//                logger.error(String.format("When loading next posts [loaded : %d]", loaded), e);
+//            }
+//        }
+
+        vkPostsTableRepo.save(new VKPostsTable()
+            .setId(1L)
+            .setProfileId("thorinhoodie")
+            .setText("text"));
+//        vkPostsTableRepo.findAllByProfileId("thorinhoodie");
+        int a = 5;
     }
 
     public void load(List<String> vkIds, int depth) {
-        MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
         vkIds = vkIds.stream()
             .filter(x -> !vkProfilesCache.contains(x))
             .collect(Collectors.toList());
@@ -78,8 +94,15 @@ public class Loader {
     private List<String> loadNext(List<String> ids) {
         return vkProfilesCache.filter(Lists.partition(ids, 25).stream())
             .flatMap(partition -> {
-                List<VKTable> vkProfiles = vkService.getUsersInfo(partition);
+                List<VKTable> vkProfiles = measureTimeUtil.measure(vkService::getUsersInfo, partition, logger,
+                        "vk profiles", partition.size());
                 vkdbService.saveProfiles(vkProfiles);
+
+                vkService.getUsersPosts(vkProfiles.stream()
+                        .map(VKTable::getDomain)
+                        .collect(Collectors.toList()));
+
+
                 List<String> friends = vkProfiles.stream()
                         .flatMap(x -> {
                             if (CollectionUtils.isNotEmpty(x.getLinked())) {
@@ -94,11 +117,17 @@ public class Loader {
                         .filter(x -> !"null".equalsIgnoreCase(x))
                         .filter(x -> !twitterProfilesCache.contains(x))
                         .collect(Collectors.toList());
-                List<TwitterTable> twitterProfiles = twitterService.getUsersInfo(twitters);
+                List<TwitterTable> twitterProfiles = measureTimeUtil.measure(twitterService::getUsersInfo, twitters,
+                        logger, "twitter profiles", twitters.size());
                 twitterDBService.saveProfiles(twitterProfiles);
                 return friends.stream();
             })
             .collect(Collectors.toList());
+    }
+
+    private void loadVKPosts(List<VKTable> vkProfiles) {
+        Collection<VKPostsTable> posts =
+
     }
 
 }

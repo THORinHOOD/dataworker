@@ -3,7 +3,6 @@ package com.thorinhood.dataworker.services;
 import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
-import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class TwitterService extends SocialService<TwitterTable, String, TwitterFriendsTable> {
+public class TwitterService extends SocialService<TwitterTable, Object, String, TwitterFriendsTable> {
 
     private Twitter twitter;
     private final List<FieldExtractor> pairs = List.of(
@@ -44,16 +43,19 @@ public class TwitterService extends SocialService<TwitterTable, String, TwitterF
         if (CollectionUtils.isEmpty(users)) {
             return Collections.emptyList();
         }
-        Supplier<List<TwitterTable>> get = () -> {
-            List<TwitterTable> result = Collections.emptyList();
-            try {
-                result = getUsersInfo(pairs, users);
-            } catch(Exception e) {
-                logger.error("Error [twitter profiles loading] : " + users.toString(), e);
-            }
-            return result;
-        };
-        return (new MeasureTimeUtil()).measure(get, logger, "twitter profiles loading", users.size());
+
+        List<TwitterTable> result = Collections.emptyList();
+        try {
+            result = getUsersInfo(pairs, users);
+        } catch(Exception e) {
+            logger.error("Error [twitter profiles loading] : " + users.toString(), e);
+        }
+        return result;
+    }
+
+    @Override
+    public Collection<Object> getUsersPosts(Collection<String> strings) {
+        return null;
     }
 
     public Twitter getTwitter() {

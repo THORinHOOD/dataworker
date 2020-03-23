@@ -5,10 +5,13 @@ import com.thorinhood.dataworker.tables.profile.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public abstract class SocialService<
         TABLE extends Profile<ID, FRIENDS_TABLE>,
+        POSTS_TABLE,
         ID,
         FRIENDS_TABLE extends FriendsPair> {
 
@@ -19,5 +22,6 @@ public abstract class SocialService<
     }
 
     public abstract List<TABLE> getUsersInfo(List<ID> ids);
+    public abstract Collection<POSTS_TABLE> getUsersPosts(Collection<ID> ids);
 
 }

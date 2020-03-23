@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.loaders;
 
-import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
-import com.thorinhood.dataworker.repositories.VKTableRepo;
+import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.profiles.VKTableRepo;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.friends.VKFriendsTable;

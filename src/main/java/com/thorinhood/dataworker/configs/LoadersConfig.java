@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.loaders.Loader;
+import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.TwitterDBService;
@@ -21,7 +22,8 @@ public class LoadersConfig {
                          VKDBService vkdbService,
                          TwitterDBService twitterDBService,
                          VKProfilesCache vkProfilesCache,
-                         TwitterProfilesCache twitterProfilesCache) {
+                         TwitterProfilesCache twitterProfilesCache,
+                         VKPostsTableRepo vkPostsTableRepo) {
         return new Loader
         (
             vkService,
@@ -29,7 +31,8 @@ public class LoadersConfig {
             vkdbService,
             twitterDBService,
             vkProfilesCache,
-            twitterProfilesCache
+            twitterProfilesCache,
+            vkPostsTableRepo
         );
     }
 

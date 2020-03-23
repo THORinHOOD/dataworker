@@ -2,7 +2,7 @@ package com.thorinhood.dataworker.db;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.collect.Lists;
-import com.thorinhood.dataworker.repositories.RelatedTableRepo;
+import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.friends.FriendsPair;
 import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.profile.Profile;
@@ -34,9 +34,11 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>,
-                                FRIENDSREPO extends CassandraRepository<TABLE_FRIENDS, FriendsPrimaryKey>,
+public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID>,
+                                FRIENDS_REPO extends CassandraRepository<TABLE_FRIENDS, FriendsPrimaryKey>,
+                                POSTS_REPO extends CassandraRepository<TABLE_POSTS, Long>,
                                 TABLE extends Profile<ID, TABLE_FRIENDS>,
+                                TABLE_POSTS,
                                 ID,
                                 TABLE_FRIENDS extends FriendsPair> {
 
@@ -49,20 +51,25 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
     );
 
     protected final Logger logger;
-    protected final TABLEREPO tableRepo;
+    protected final TABLE_REPO tableRepo;
+    protected final POSTS_REPO postsRepo;
     protected final CassandraTemplate cassandraTemplate;
     protected final String unindexedTable;
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
     protected final RelatedTableRepo relatedTableRepo;
     protected final JdbcTemplate postgresJdbc;
-    protected final FRIENDSREPO friendsRepo;
+    protected final FRIENDS_REPO friendsRepo;
     protected final List<Consumer<Collection<String>>> saveProfilesEvents;
     protected final ExecutorService friendsExecutorService;
+    protected final ExecutorService postsExecutorService;
     protected final int friendsThreads;
+    protected final int postsThreads;
+    protected final MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
 
-    public DBService(TABLEREPO tableRepo,
-                     FRIENDSREPO friendsRepo,
+    public DBService(TABLE_REPO tableRepo,
+                     FRIENDS_REPO friendsRepo,
+                     POSTS_REPO postsRepo,
                      CassandraTemplate cassandraTemplate,
                      String unindexedTable,
                      String needFriendsTable,
@@ -70,7 +77,8 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
                      RelatedTableRepo relatedTableRepo,
                      JdbcTemplate postgresJdbc,
                      Class dbServiceClass,
-                     int friendsThreads) {
+                     int friendsThreads,
+                     int postsThreads) {
         this.cassandraTemplate = cassandraTemplate;
         this.tableRepo = tableRepo;
         this.unindexedTable = unindexedTable;
@@ -80,9 +88,12 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         logger = LoggerFactory.getLogger(dbServiceClass);
         this.postgresJdbc = postgresJdbc;
         this.friendsRepo = friendsRepo;
+        this.postsRepo = postsRepo;
         this.saveProfilesEvents = new ArrayList<>();
-        friendsExecutorService = Executors.newFixedThreadPool(friendsThreads);
         this.friendsThreads = friendsThreads;
+        this.postsThreads = postsThreads;
+        friendsExecutorService = Executors.newFixedThreadPool(friendsThreads);
+        postsExecutorService = Executors.newFixedThreadPool(postsThreads);
     }
 
     public Slice<TABLE> findAll(Pageable pageable) {
@@ -119,22 +130,38 @@ public abstract class DBService<TABLEREPO extends CassandraRepository<TABLE, ID>
         saveProfilesEvents.forEach(eventHandler -> eventHandler.accept(ids));
     }
 
+    public void savePosts(List<TABLE_POSTS> posts) {
+        measureTimeUtil.measure(() -> {
+            List<Future> futures = Lists.partition(posts, Math.max(posts.size()/postsThreads, posts.size()))
+                .stream()
+                .map(x -> postsExecutorService.submit(() -> postsRepo.saveAll(x)))
+                .collect(Collectors.toList());
+            futures.forEach(x -> {
+                try {
+                    x.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error [posts in future saving]", e);
+                }
+            });
+        }, logger, "posts saving", posts.size());
+    }
+
     public void saveProfiles(Collection<TABLE> profiles) {
-        final MeasureTimeUtil measureTimeUtil = new MeasureTimeUtil();
         Lists.partition(new ArrayList<>(profiles), 100).forEach(partition -> {
             measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving", partition.size());
             List<TABLE_FRIENDS> friends = partition.stream()
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList());
             measureTimeUtil.measure(() -> {
-                List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, 1)).stream()
+                List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, friends.size()))
+                    .stream()
                     .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
                     .collect(Collectors.toList());
                 futures.forEach(x -> {
                     try {
                         x.get();
                     } catch (InterruptedException | ExecutionException e) {
-                        logger.error("Error [friends in future]", e);
+                        logger.error("Error [friends in future saving]", e);
                     }
                 });
             }, logger, "friends saving", friends.size());

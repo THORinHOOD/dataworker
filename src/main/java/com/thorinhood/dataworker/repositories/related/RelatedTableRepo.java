@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.repositories;
+package com.thorinhood.dataworker.repositories.related;
 
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import org.springframework.data.cassandra.repository.CassandraRepository;

@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.loaders;
 
-import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
-import com.thorinhood.dataworker.repositories.TwitterTableRepo;
+import com.thorinhood.dataworker.repositories.friends.TwitterFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.profiles.TwitterTableRepo;
 import com.thorinhood.dataworker.services.TwitterService;
 import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
