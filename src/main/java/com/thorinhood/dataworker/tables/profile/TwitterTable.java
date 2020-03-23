@@ -1,5 +1,6 @@
-package com.thorinhood.dataworker.tables;
+package com.thorinhood.dataworker.tables.profile;
 
+import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;

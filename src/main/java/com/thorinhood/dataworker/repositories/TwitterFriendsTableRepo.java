@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.repositories;
 
-import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
-import com.thorinhood.dataworker.tables.TwitterFriendsTable;
+import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
+import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.stereotype.Repository;
 

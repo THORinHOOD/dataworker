@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.repositories;
 
-import com.thorinhood.dataworker.tables.FriendsPrimaryKey;
-import com.thorinhood.dataworker.tables.VKFriendsTable;
+import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
+import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.data.repository.query.Param;

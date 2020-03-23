@@ -15,12 +15,12 @@ public class VkController {
         this.vkdbService = vkdbService;
     }
 
-    @GetMapping("/vk/allProfiles/count")
+    @GetMapping("/allProfiles/count")
     public long countVk() {
         return vkdbService.countAllProfiles();
     }
 
-    @GetMapping("/vk/allProfiles/friends/count")
+    @GetMapping("/allProfiles/friends/count")
     public long countFriendsVk() {
         return vkdbService.countFriends();
     }

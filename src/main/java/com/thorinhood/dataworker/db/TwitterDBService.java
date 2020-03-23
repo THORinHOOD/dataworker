@@ -3,8 +3,8 @@ package com.thorinhood.dataworker.db;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.TwitterTableRepo;
-import com.thorinhood.dataworker.tables.TwitterFriendsTable;
-import com.thorinhood.dataworker.tables.TwitterTable;
+import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
+import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 

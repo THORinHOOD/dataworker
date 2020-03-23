@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.tables;
+package com.thorinhood.dataworker.tables.related;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.mapping.Column;

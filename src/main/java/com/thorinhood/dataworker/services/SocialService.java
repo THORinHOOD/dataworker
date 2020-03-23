@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.services;
 
-import com.thorinhood.dataworker.tables.FriendsPair;
-import com.thorinhood.dataworker.tables.Profile;
+import com.thorinhood.dataworker.tables.friends.FriendsPair;
+import com.thorinhood.dataworker.tables.profile.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

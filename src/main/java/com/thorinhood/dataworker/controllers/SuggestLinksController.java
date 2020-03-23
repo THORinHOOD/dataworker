@@ -2,8 +2,8 @@ package com.thorinhood.dataworker.controllers;
 
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.db.VKDBService;
-import com.thorinhood.dataworker.tables.RelatedTable;
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.related.RelatedTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +47,6 @@ public class SuggestLinksController {
                 assumptions.put("instagram", relatedTable.getInstagram());
                 return assumptions;
             }
-
         } else {
             return Collections.emptyMap();
         }

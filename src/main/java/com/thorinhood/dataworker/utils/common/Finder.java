@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.utils.common;
 
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
-import com.thorinhood.dataworker.tables.RelatedTable;
+import com.thorinhood.dataworker.tables.related.RelatedTable;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

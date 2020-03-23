@@ -3,8 +3,8 @@ package com.thorinhood.dataworker.db;
 import com.thorinhood.dataworker.repositories.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
-import com.thorinhood.dataworker.tables.VKFriendsTable;
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 

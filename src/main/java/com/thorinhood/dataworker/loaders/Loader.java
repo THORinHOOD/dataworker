@@ -7,12 +7,16 @@ import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.cache.VKProfilesCache;
-import com.thorinhood.dataworker.tables.TwitterTable;
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.profile.TwitterTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.objects.wall.responses.GetResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +46,22 @@ public class Loader {
         this.twitterDBService = twitterDBService;
         this.twitterProfilesCache = twitterProfilesCache;
         this.vkProfilesCache = vkProfilesCache;
+    }
+
+    @Scheduled(fixedRate = Long.MAX_VALUE)
+    public void kek() {
+        long loaded = 0;
+        for (;;) {
+            try {
+                GetResponse getResponse = vkService.getVK()
+                        .domain("thorinhoodie")
+                        .execute();
+                loaded += getResponse.getCount();
+                logger.info(String.format("loaded : %d", loaded));
+            } catch (ApiException | ClientException e) {
+                logger.error(String.format("When loading next posts [loaded : %d]", loaded), e);
+            }
+        }
     }
 
     public void load(List<String> vkIds, int depth) {

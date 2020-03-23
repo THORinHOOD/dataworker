@@ -4,8 +4,8 @@ import com.thorinhood.dataworker.repositories.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.VKTableRepo;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.VKDBService;
-import com.thorinhood.dataworker.tables.VKFriendsTable;
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Collections;

@@ -1,8 +1,8 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.db.VKDBService;
-import com.thorinhood.dataworker.tables.VKFriendsTable;
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.thorinhood.dataworker.utils.vk.VKDataUtil;

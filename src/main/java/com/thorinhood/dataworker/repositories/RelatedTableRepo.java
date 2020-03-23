@@ -1,11 +1,9 @@
 package com.thorinhood.dataworker.repositories;
 
-import com.thorinhood.dataworker.tables.RelatedTable;
+import com.thorinhood.dataworker.tables.related.RelatedTable;
 import org.springframework.data.cassandra.repository.CassandraRepository;
-import org.springframework.data.cassandra.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository

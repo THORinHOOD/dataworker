@@ -1,8 +1,7 @@
 package com.thorinhood.dataworker.services;
 
-import com.thorinhood.dataworker.tables.TwitterFriendsTable;
-import com.thorinhood.dataworker.tables.TwitterTable;
-import com.thorinhood.dataworker.utils.common.BatchProfiles;
+import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
+import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import org.springframework.social.twitter.api.Twitter;
@@ -12,11 +11,9 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;

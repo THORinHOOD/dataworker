@@ -1,6 +1,6 @@
 package com.thorinhood.dataworker.utils.vk;
 
-import com.thorinhood.dataworker.tables.VKTable;
+import com.thorinhood.dataworker.tables.profile.VKTable;
 
 import java.util.Arrays;
 import java.util.Collection;

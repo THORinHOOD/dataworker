@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.utils.common;
 
-import com.thorinhood.dataworker.tables.FriendsPair;
-import com.thorinhood.dataworker.tables.Profile;
+import com.thorinhood.dataworker.tables.friends.FriendsPair;
+import com.thorinhood.dataworker.tables.profile.Profile;
 
 import java.util.Collection;
 
