@@ -4,9 +4,10 @@ import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
 import com.thorinhood.dataworker.tables.posts.TwitterPostsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.social.twitter.api.Tweet;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TwitterService extends SocialService<TwitterTable, TwitterPostsTable, String, TwitterFriendsTable> {
@@ -55,8 +55,22 @@ public class TwitterService extends SocialService<TwitterTable, TwitterPostsTabl
     }
 
     @Override
-    public List<TwitterPostsTable> getUsersPosts(Collection<String> strings) {
-        return null;
+    public List<TwitterPostsTable> getUsersPosts(Collection<String> screenNames) {
+        List<TwitterPostsTable> result = new ArrayList<>();
+        screenNames.forEach(id -> {
+            try {
+                List<Tweet> tweets = twitter.timelineOperations().getUserTimeline(id, 25);
+                result.addAll(tweets.stream()
+                        .map(tweet -> new TwitterPostsTable()
+                                .setId(tweet.getId())
+                                .setProfileId(id)
+                                .setText(tweet.getText()))
+                        .collect(Collectors.toList()));
+            } catch (Exception e) {
+                logger.error(String.format("Can't get tweets of %s", id));
+            }
+        });
+        return result;
     }
 
     public Twitter getTwitter() {
