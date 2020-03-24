@@ -139,15 +139,15 @@ public class VKService extends SocialService<VKTable, VKPostsTable, String, VKFr
         ids.forEach(id -> {
             try {
                 GetResponse getResponse = vk.wall().get(serviceActor)
-                        .domain(id)
-                        .count(25)
-                        .filter(WallGetFilter.OWNER)
-                        .execute();
+                    .domain(id)
+                    .count(25)
+                    .filter(WallGetFilter.OWNER)
+                    .execute();
                 result.addAll(getResponse.getItems().stream()
                     .map(item -> new VKPostsTable()
-                            .setId(Long.valueOf(item.getId()))
-                            .setText(item.getText())
-                            .setProfileId(id))
+                        .setId(Long.valueOf(item.getId()))
+                        .setText(item.getText())
+                        .setProfileId(id))
                     .collect(Collectors.toList()));
             } catch (Exception e) {
                 logger.error(String.format("Can't get vk posts of %s", id));
