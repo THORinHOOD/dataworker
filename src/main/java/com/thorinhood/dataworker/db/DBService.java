@@ -231,6 +231,7 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
         tableRepo.deleteAll();
         relatedTableRepo.deleteAll();
         friendsRepo.deleteAll();
+        postsRepo.deleteAll();
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
