@@ -10,7 +10,6 @@ import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.utils.common.Finder;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.thorinhood.dataworker.utils.common.MultiTool;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.cassandra.core.CassandraTemplate;
@@ -18,13 +17,10 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -105,25 +101,6 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
         saveProfilesEvents.add(onSave);
     }
 
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public List<ID> takeUnindexedPages(int count) {
-        try {
-            if (count <= 0) {
-                return Collections.emptyList();
-            }
-            List<ID> ids = postgresJdbc.queryForList("select * from " + unindexedTable + " limit " + count, idClass);
-            if (ids.size() > 0) {
-                postgresJdbc.execute("DELETE FROM " + unindexedTable + " WHERE id in (" + ids.stream()
-                        .map(String::valueOf).map(x -> "\'" + x + "\'")
-                        .collect(Collectors.joining(",")) + ")");
-            }
-            return ids;
-        } catch (Exception ex) {
-            logger.error("Failed to take unindexed pages", ex);
-            return Collections.emptyList();
-        }
-    }
-
     private void handleSaveEvent(Collection<TABLE> savedTables) {
         Collection<String> ids = savedTables.stream()
                 .map(Profile::getId)
@@ -140,8 +117,8 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
             futures.forEach(x -> {
                 try {
                     x.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error [posts in future saving]", e);
+                } catch (Exception e) {
+                    logger.error("Error [posts in future saving]");
                 }
             });
         }, posts, "posts saving", measureTimeUtil, logger);
@@ -234,26 +211,6 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
         relatedTableRepo.deleteAll();
         friendsRepo.deleteAll();
         postsRepo.deleteAll();
-    }
-
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void saveUnindexed(Collection<ID> ids) {
-        logger.info("Start saving unindexed : " + ids.size());
-        try {
-            if (CollectionUtils.isEmpty(ids)) {
-                return;
-            }
-            try {
-                postgresJdbc.update("INSERT INTO " + unindexedTable + " (id) VALUES " + batch(ids)  + " ON CONFLICT " +
-                        "(id) DO NOTHING");
-            } catch(Exception ex) {
-                logger.error("Error while insert unindexed", ex);
-            }
-        } catch(Exception exception) {
-            logger.error("Failed to save unindexed pages", exception);
-            return;
-        }
-        logger.info("Saved unindexed : " + ids.size());
     }
 
     public Optional<TABLE> getPageById(ID id) {
