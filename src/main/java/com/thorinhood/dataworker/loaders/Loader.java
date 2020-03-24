@@ -111,12 +111,7 @@ public class Loader {
                         .collect(Collectors.toList());
                 List<TwitterTable> twitterProfiles = measureTimeUtil.measure(twitterService::getUsersInfo, twitters,
                         logger, "twitter profiles", twitters.size());
-                try {
-                    twitterDBService.saveProfiles(twitterProfiles);
-                } catch(Exception e) {
-                    logger.error("Error", e);
-                    throw e;
-                }
+                twitterDBService.saveProfiles(twitterProfiles);
                 return friends.stream();
             })
             .collect(Collectors.toList());

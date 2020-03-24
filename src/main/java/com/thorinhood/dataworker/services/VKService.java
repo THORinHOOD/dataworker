@@ -9,6 +9,7 @@ import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.ServiceActor;
+import com.vk.api.sdk.exceptions.ApiAccessException;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
@@ -148,6 +149,8 @@ public class VKService extends SocialService<VKTable, VKPostsTable, String, VKFr
                             .setText(item.getText())
                             .setProfileId(id))
                     .collect(Collectors.toList()));
+            } catch (ApiAccessException e) {
+                logger.error(String.format("Can't get vk posts of %s", id));
             } catch (ApiException | ClientException e) {
                 logger.error(String.format("Can't get posts of vk user : %s", id), e);
             }
