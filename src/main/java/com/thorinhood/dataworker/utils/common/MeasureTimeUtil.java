@@ -2,6 +2,7 @@ package com.thorinhood.dataworker.utils.common;
 
 import org.slf4j.Logger;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -43,6 +44,13 @@ public class MeasureTimeUtil {
         OUTPUT result = function.apply(input);
         loggerEnd(logger, info, count);
         return result;
+    }
+
+    public <INPUT> void measure(Consumer<INPUT> function, INPUT input, Logger logger, String info, long count) {
+        loggerStart(logger, info, count);
+        start();
+        function.accept(input);
+        loggerEnd(logger, info, count);
     }
 
     private void loggerEnd(Logger logger, String info, long count) {

@@ -9,6 +9,7 @@ import com.thorinhood.dataworker.tables.profile.Profile;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.utils.common.Finder;
 import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
+import com.thorinhood.dataworker.utils.common.MultiTool;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,11 +132,11 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
     }
 
     public void savePosts(List<TABLE_POSTS> posts) {
-        measureTimeUtil.measure(() -> {
-            List<Future> futures = Lists.partition(posts, Math.max(posts.size()/postsThreads, posts.size()))
-                .stream()
-                .map(x -> postsExecutorService.submit(() -> postsRepo.saveAll(x)))
-                .collect(Collectors.toList());
+        MultiTool.executeNotEmptyWithMeasure(postsList -> {
+            List<Future> futures = Lists.partition(postsList, Math.max(postsList.size()/postsThreads, postsList.size()))
+                    .stream()
+                    .map(x -> postsExecutorService.submit(() -> postsRepo.saveAll(x)))
+                    .collect(Collectors.toList());
             futures.forEach(x -> {
                 try {
                     x.get();
@@ -143,20 +144,20 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
                     logger.error("Error [posts in future saving]", e);
                 }
             });
-        }, logger, "posts saving", posts.size());
+        }, posts, "posts saving", measureTimeUtil, logger);
     }
 
-    public void saveProfiles(Collection<TABLE> profiles) {
-        Lists.partition(new ArrayList<>(profiles), 100).forEach(partition -> {
-            measureTimeUtil.measure(() -> tableRepo.saveAll(partition), logger, "profiles saving", partition.size());
-            List<TABLE_FRIENDS> friends = partition.stream()
+    public void saveProfiles(List<TABLE> profiles) {
+        MultiTool.partition(profiles, 100, batch -> {
+            measureTimeUtil.measure(() -> tableRepo.saveAll(batch), logger, "profiles saving", batch.size());
+            List<TABLE_FRIENDS> extractedFriends = batch.stream()
                     .flatMap(profile -> profile.generatePairs().stream())
                     .collect(Collectors.toList());
-            measureTimeUtil.measure(() -> {
-                List<Future> futures = Lists.partition(friends, Math.max(friends.size()/friendsThreads, friends.size()))
-                    .stream()
-                    .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
-                    .collect(Collectors.toList());
+            MultiTool.executeNotEmptyWithMeasure(friends -> {
+                List<Future> futures = Lists.partition(friends, Math.max(friends.size() / friendsThreads, friends.size()))
+                        .stream()
+                        .map(x -> friendsExecutorService.submit(() -> friendsRepo.saveAll(x)))
+                        .collect(Collectors.toList());
                 futures.forEach(x -> {
                     try {
                         x.get();
@@ -164,12 +165,13 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
                         logger.error("Error [friends in future saving]", e);
                     }
                 });
-            }, logger, "friends saving", friends.size());
-            Collection<RelatedTable> relatedTables = actualize(convert(partition));
-            measureTimeUtil.measure(() -> relatedTableRepo.saveAll(relatedTables), logger,
-                    "related", relatedTables.size());
+            }, extractedFriends, "friends saving", measureTimeUtil, logger);
+            Collection<RelatedTable> relatedTables = actualize(convert(batch));
+            measureTimeUtil.measure(() -> relatedTableRepo.saveAll(relatedTables), logger, "related",
+                    relatedTables.size());
         });
-        measureTimeUtil.measure(() -> handleSaveEvent(profiles), logger, "handle profiles saving", profiles.size());
+        MultiTool.executeNotEmpty(data -> measureTimeUtil.measure(() -> handleSaveEvent(data), logger,
+            "handle profiles saving", profiles.size()), profiles);
     }
 
     public Collection<RelatedTable> actualize(Collection<RelatedTable> tables) {

@@ -63,7 +63,7 @@ public class TwitterService extends SocialService<TwitterTable, TwitterPostsTabl
         return twitter;
     }
 
-    public List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
+    private List<TwitterTable> getUsersInfo(Collection<FieldExtractor> pairs,
                              Collection<String> userScreenNames) throws InterruptedException {
         List<TwitterProfile> twitterProfiles = twitter.userOperations()
                 .getUsers(userScreenNames.toArray(String[]::new));
