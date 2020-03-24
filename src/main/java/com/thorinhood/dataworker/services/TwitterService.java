@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.services;
 
 import com.thorinhood.dataworker.tables.friends.TwitterFriendsTable;
+import com.thorinhood.dataworker.tables.posts.TwitterPostsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
 import org.springframework.social.twitter.api.Twitter;
@@ -18,7 +19,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class TwitterService extends SocialService<TwitterTable, Object, String, TwitterFriendsTable> {
+public class TwitterService extends SocialService<TwitterTable, TwitterPostsTable, String, TwitterFriendsTable> {
 
     private Twitter twitter;
     private final List<FieldExtractor> pairs = List.of(
@@ -54,7 +55,7 @@ public class TwitterService extends SocialService<TwitterTable, Object, String, 
     }
 
     @Override
-    public Collection<Object> getUsersPosts(Collection<String> strings) {
+    public List<TwitterPostsTable> getUsersPosts(Collection<String> strings) {
         return null;
     }
 

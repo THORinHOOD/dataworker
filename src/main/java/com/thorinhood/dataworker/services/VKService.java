@@ -133,8 +133,8 @@ public class VKService extends SocialService<VKTable, VKPostsTable, String, VKFr
     }
 
     @Override
-    public Collection<VKPostsTable> getUsersPosts(Collection<String> ids) {
-        Collection<VKPostsTable> result = new ArrayList<>();
+    public List<VKPostsTable> getUsersPosts(Collection<String> ids) {
+        List<VKPostsTable> result = new ArrayList<>();
         ids.forEach(id -> {
             try {
                 GetResponse getResponse = vk.wall().get(serviceActor)

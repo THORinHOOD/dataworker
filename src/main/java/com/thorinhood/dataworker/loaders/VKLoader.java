@@ -1,10 +1,12 @@
 package com.thorinhood.dataworker.loaders;
 
 import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
+import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
 import com.thorinhood.dataworker.repositories.profiles.VKTableRepo;
 import com.thorinhood.dataworker.services.VKService;
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
+import com.thorinhood.dataworker.tables.posts.VKPostsTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -13,8 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKFriendsTableRepo, VKTable, String,
-        VKFriendsTable> {
+public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKFriendsTableRepo, VKPostsTableRepo, VKTable,
+        VKPostsTable, String, VKFriendsTable> {
 
     public VKLoader(VKDBService dbService, VKService vkService) {
         super(dbService, vkService, VKLoader.class);

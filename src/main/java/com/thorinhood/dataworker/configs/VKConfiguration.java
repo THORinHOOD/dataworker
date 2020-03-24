@@ -1,6 +1,7 @@
 package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.cache.StringCache;
+import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.profiles.VKTableRepo;
@@ -36,6 +37,9 @@ public class VKConfiguration {
     @Value("${vk.db.service.friends.threads}")
     private Integer vkDBFriendsServiceThreadsCount;
 
+    @Value("${vk.db.service.posts.threads}")
+    private Integer vkDBPostsServiceThreadsCount;
+
     @Bean
     public VKService vkService(VKDBService dbService,
                                VKFriendsService vkFriendsService) throws ClientException, ApiException {
@@ -60,16 +64,19 @@ public class VKConfiguration {
     @Bean
     public VKDBService vkdbService(VKTableRepo vkTableRepo,
                                    VKFriendsTableRepo vkFriendsTableRepo,
+                                   VKPostsTableRepo vkPostsTableRepo,
                                    CassandraTemplate cassandraTemplate,
                                    RelatedTableRepo relatedTableRepo,
                                    JdbcTemplate postgresJdbc) {
         return new VKDBService(
                 vkTableRepo,
                 vkFriendsTableRepo,
+                vkPostsTableRepo,
                 cassandraTemplate,
                 relatedTableRepo,
                 postgresJdbc,
-                vkDBFriendsServiceThreadsCount
+                vkDBFriendsServiceThreadsCount,
+                vkDBPostsServiceThreadsCount
         );
     }
 

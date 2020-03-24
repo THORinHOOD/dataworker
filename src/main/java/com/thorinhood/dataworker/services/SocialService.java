@@ -22,6 +22,6 @@ public abstract class SocialService<
     }
 
     public abstract List<TABLE> getUsersInfo(List<ID> ids);
-    public abstract Collection<POSTS_TABLE> getUsersPosts(Collection<ID> ids);
+    public abstract List<POSTS_TABLE> getUsersPosts(Collection<ID> ids);
 
 }

@@ -4,6 +4,7 @@ import com.thorinhood.dataworker.cache.StringCache;
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.jobs.TwitterFriendsMaker;
+import com.thorinhood.dataworker.repositories.posts.TwitterPostsTableRepo;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.friends.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.profiles.TwitterTableRepo;
@@ -34,6 +35,9 @@ public class TwitterConfiguration {
 
     @Value("${twitter.db.service.friends.threads}")
     private Integer dbServiceFriendsThreadsCount;
+
+    @Value("${twitter.db.service.posts.threads}")
+    private Integer dbServicePostsThreadsCount;
 
 //    @Bean
 //    public ConnectionFactoryLocator connectionFactoryLocator() {
@@ -75,16 +79,19 @@ public class TwitterConfiguration {
     @Bean
     public TwitterDBService twitterDBService(TwitterTableRepo twitterTableRepo,
                                              TwitterFriendsTableRepo twitterFriendsTableRepo,
+                                             TwitterPostsTableRepo twitterPostsTableRepo,
                                              CassandraTemplate cassandraTemplate,
                                              RelatedTableRepo relatedTableRepo,
                                              JdbcTemplate postgresJdbc) {
         return new TwitterDBService(
                 twitterTableRepo,
                 twitterFriendsTableRepo,
+                twitterPostsTableRepo,
                 cassandraTemplate,
                 relatedTableRepo,
                 postgresJdbc,
-                dbServiceFriendsThreadsCount
+                dbServiceFriendsThreadsCount,
+                dbServicePostsThreadsCount
         );
     }
 

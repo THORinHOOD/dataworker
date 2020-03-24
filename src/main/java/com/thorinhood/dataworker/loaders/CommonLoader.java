@@ -6,6 +6,7 @@ import com.thorinhood.dataworker.db.DBService;
 import com.thorinhood.dataworker.tables.friends.FriendsPair;
 import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.profile.Profile;
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,21 +20,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class CommonLoader<
-        DB extends DBService<TABLEREPO, FRIENDSREPO, TABLE, ID, FRIENDS_TABLE>,
-        TABLEREPO extends CassandraRepository<TABLE, ID>,
-        FRIENDSREPO extends CassandraRepository<FRIENDS_TABLE, FriendsPrimaryKey>,
+        DB extends DBService<TABLE_REPO, FRIENDS_REPO, POSTS_REPO, TABLE, TABLE_POSTS, ID, FRIENDS_TABLE>,
+        TABLE_REPO extends CassandraRepository<TABLE, ID>,
+        FRIENDS_REPO extends CassandraRepository<FRIENDS_TABLE, FriendsPrimaryKey>,
+        POSTS_REPO extends CassandraRepository<TABLE_POSTS, Long>,
         TABLE extends Profile<ID, FRIENDS_TABLE>,
+        TABLE_POSTS,
         ID,
         FRIENDS_TABLE extends FriendsPair> {
 
     private final static int THREADS_COUNT = 30;
     protected final Logger logger;
     protected final DB dbService;
-    protected final SocialService<TABLE, ID, FRIENDS_TABLE> service;
+    protected final SocialService<TABLE, TABLE_POSTS, ID, FRIENDS_TABLE> service;
     private final Class loaderClass;
     private final ExecutorService threadPool = Executors.newFixedThreadPool(THREADS_COUNT);
 
-    public CommonLoader(DB dbService, SocialService<TABLE, ID, FRIENDS_TABLE> service, Class loaderClass) {
+    public CommonLoader(DB dbService, SocialService<TABLE, TABLE_POSTS, ID, FRIENDS_TABLE> service, Class loaderClass) {
         this.dbService = dbService;
         this.service = service;
         this.loaderClass = loaderClass;
