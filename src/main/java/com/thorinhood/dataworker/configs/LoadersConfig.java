@@ -2,8 +2,8 @@ package com.thorinhood.dataworker.configs;
 
 import com.thorinhood.dataworker.loaders.Loader;
 import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
-import com.thorinhood.dataworker.services.TwitterService;
-import com.thorinhood.dataworker.services.VKService;
+import com.thorinhood.dataworker.services.social.TwitterService;
+import com.thorinhood.dataworker.services.social.VKService;
 import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.db.VKDBService;

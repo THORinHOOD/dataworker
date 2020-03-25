@@ -9,7 +9,7 @@ import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.friends.TwitterFriendsTableRepo;
 import com.thorinhood.dataworker.repositories.profiles.TwitterTableRepo;
 import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
-import com.thorinhood.dataworker.services.TwitterService;
+import com.thorinhood.dataworker.services.social.TwitterService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

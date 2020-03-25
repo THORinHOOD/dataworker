@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.services;
+package com.thorinhood.dataworker.services.social;
 
 import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
@@ -9,7 +9,6 @@ import com.thorinhood.dataworker.utils.vk.VKDataUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.ServiceActor;
-import com.vk.api.sdk.exceptions.ApiAccessException;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
@@ -25,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

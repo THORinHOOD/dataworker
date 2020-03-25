@@ -1,12 +1,11 @@
 package com.thorinhood.dataworker.loaders;
 
 import com.google.common.collect.Lists;
-import com.thorinhood.dataworker.services.SocialService;
+import com.thorinhood.dataworker.services.social.SocialService;
 import com.thorinhood.dataworker.db.DBService;
 import com.thorinhood.dataworker.tables.friends.FriendsPair;
 import com.thorinhood.dataworker.tables.friends.FriendsPrimaryKey;
 import com.thorinhood.dataworker.tables.profile.Profile;
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.services;
+package com.thorinhood.dataworker.services.social;
 
 import com.thorinhood.dataworker.tables.friends.FriendsPair;
 import com.thorinhood.dataworker.tables.profile.Profile;
