@@ -28,6 +28,7 @@
         </Root>
 
         <Logger name="com.thorinhood" level="trace"></Logger>
+        <Logger name="com.vk.api.sdk.client" level="OFF"/>
     </Loggers>
 
 </Configuration>

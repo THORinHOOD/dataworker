@@ -148,7 +148,7 @@ public class VKService extends SocialService<VKTable, VKPostsTable, String, VKFr
                         .setProfileId(id))
                     .collect(Collectors.toList()));
             } catch (Exception e) {
-                logger.error(String.format("Can't get vk posts of %s", id));
+                logger.error(String.format("Can't get vk posts of %s (message : %s)", id, e.getMessage()));
             }
         });
         return result;

@@ -13,7 +13,6 @@ public class TwitterProfilesCache extends CacheService<String> {
     private static final Logger logger = LoggerFactory.getLogger(TwitterProfilesCache.class);
     private Collection<Consumer<Collection<String>>> onSaveHandlers;
 
-
     public TwitterProfilesCache(TwitterDBService twitterDBService) {
         super(logger, "twitter profiles");
         onSaveHandlers = new ArrayList<>();
