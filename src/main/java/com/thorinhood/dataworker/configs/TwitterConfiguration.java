@@ -39,6 +39,9 @@ public class TwitterConfiguration {
     @Value("${twitter.db.service.posts.threads}")
     private Integer dbServicePostsThreadsCount;
 
+    @Value("${twitter.cache.profiles.count}")
+    private Integer cacheProfilesCount;
+
 //    @Bean
 //    public ConnectionFactoryLocator connectionFactoryLocator() {
 //        ConnectionFactoryRegistry registry = new ConnectionFactoryRegistry();
@@ -57,8 +60,9 @@ public class TwitterConfiguration {
     }
 
     @Bean
-    public TwitterProfilesCache twitterProfilesCache(TwitterDBService twitterDBService) {
-        return new TwitterProfilesCache(twitterDBService);
+    public TwitterProfilesCache twitterProfilesCache(TwitterDBService twitterDBService,
+                                                     TwitterTableRepo twitterTableRepo) {
+        return new TwitterProfilesCache(twitterDBService, twitterTableRepo, cacheProfilesCount);
     }
 
     @Bean(name = "twitterFriendsMakerCache")

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VKTableRepo extends CassandraRepository<VKTable, String> {
+    boolean existsByDomain(String domain);
 }

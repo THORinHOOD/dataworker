@@ -40,6 +40,9 @@ public class VKConfiguration {
     @Value("${vk.db.service.posts.threads}")
     private Integer vkDBPostsServiceThreadsCount;
 
+    @Value("${vk.cache.profiles.count}")
+    private Integer cacheProfilesCount;
+
     @Bean
     public VKService vkService(VKDBService dbService,
                                VKFriendsService vkFriendsService) throws ClientException, ApiException {
@@ -52,8 +55,9 @@ public class VKConfiguration {
     }
 
     @Bean
-    public VKProfilesCache vkProfilesCahce(VKDBService vkdbService) {
-        return new VKProfilesCache(vkdbService);
+    public VKProfilesCache vkProfilesCahce(VKDBService vkdbService,
+                                           VKTableRepo vkTableRepo) {
+        return new VKProfilesCache(vkdbService, vkTableRepo, cacheProfilesCount);
     }
 
     @Bean(name = "vkFriendsMakerCache")
