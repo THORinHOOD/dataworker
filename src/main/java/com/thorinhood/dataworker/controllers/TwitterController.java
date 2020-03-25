@@ -25,4 +25,9 @@ public class TwitterController {
         return twitterDBService.countFriends();
     }
 
+    @GetMapping("/allProfiles/posts/count")
+    public long countPosts() {
+        return twitterDBService.countPosts();
+    }
+
 }

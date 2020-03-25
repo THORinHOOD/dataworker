@@ -206,6 +206,10 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
         return friendsRepo.count();
     }
 
+    public long countPosts() {
+        return postsRepo.count();
+    }
+
     public void truncateAll() {
         tableRepo.deleteAll();
         relatedTableRepo.deleteAll();

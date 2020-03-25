@@ -25,5 +25,9 @@ public class VkController {
         return vkdbService.countFriends();
     }
 
+    @GetMapping("/allProfiles/posts/count")
+    public long countPosts() {
+        return vkdbService.countPosts();
+    }
 
 }
