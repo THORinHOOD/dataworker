@@ -1,6 +1,5 @@
 package com.thorinhood.dataworker.configs;
 
-import com.thorinhood.dataworker.cache.StringCache;
 import com.thorinhood.dataworker.repositories.posts.VKPostsTableRepo;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.repositories.friends.VKFriendsTableRepo;
@@ -58,11 +57,6 @@ public class VKConfiguration {
     public VKProfilesCache vkProfilesCahce(VKDBService vkdbService,
                                            VKTableRepo vkTableRepo) {
         return new VKProfilesCache(vkdbService, vkTableRepo, cacheProfilesCount);
-    }
-
-    @Bean(name = "vkFriendsMakerCache")
-    public StringCache vkFriendsMakerCache() {
-        return new StringCache("vk friends maker cache");
     }
 
     @Bean

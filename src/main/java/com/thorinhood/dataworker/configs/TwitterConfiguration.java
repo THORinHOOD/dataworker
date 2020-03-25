@@ -1,6 +1,5 @@
 package com.thorinhood.dataworker.configs;
 
-import com.thorinhood.dataworker.cache.StringCache;
 import com.thorinhood.dataworker.cache.TwitterProfilesCache;
 import com.thorinhood.dataworker.db.TwitterDBService;
 import com.thorinhood.dataworker.jobs.TwitterFriendsMaker;
@@ -63,11 +62,6 @@ public class TwitterConfiguration {
     public TwitterProfilesCache twitterProfilesCache(TwitterDBService twitterDBService,
                                                      TwitterTableRepo twitterTableRepo) {
         return new TwitterProfilesCache(twitterDBService, twitterTableRepo, cacheProfilesCount);
-    }
-
-    @Bean(name = "twitterFriendsMakerCache")
-    public StringCache twitterFriendsMakerCache() {
-        return new StringCache("twitter friends maker cache");
     }
 
     @Bean

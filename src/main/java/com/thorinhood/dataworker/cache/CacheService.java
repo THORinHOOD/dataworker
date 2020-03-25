@@ -1,5 +1,6 @@
 package com.thorinhood.dataworker.cache;
 
+import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
 import com.thorinhood.dataworker.utils.common.SetBlockingQueue;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -16,19 +17,21 @@ public abstract class CacheService<T> {
     protected final Logger logger;
     protected final String info;
     protected final int max;
+    private final MeasureTimeUtil measureTimeUtil;
 
     public CacheService(int max, Logger logger, String info) {
         this.logger = logger;
         this.info = info;
         cache = new SetBlockingQueue<>();
         this.max = max;
+        measureTimeUtil = new MeasureTimeUtil();
     }
 
     public synchronized void handleSave(Collection<T> objects) {
-        logger.info(String.format("Start caching [%s]", info));
-        objects.forEach(this::add);
-        onSaveEnd(objects);
-        logger.info(String.format("End caching [%s]", info));
+        measureTimeUtil.measure(data -> {
+            data.forEach(this::add);
+            onSaveEnd(data);
+        }, objects, logger, info + " caching", objects.size());
     }
 
     protected synchronized void add(T object) {
