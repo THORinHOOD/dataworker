@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping("/user")
@@ -35,20 +36,26 @@ public class SuggestLinksController {
     public Map<String, String> getAssumptions(@RequestParam String socialNetwork,
                                               @RequestParam String id) {
         if (socialNetwork.equalsIgnoreCase("vk")) {
-            RelatedTable relatedTable = relatedTableRepo.findByVkDomain(id);
-            if (relatedTable == null) {
-                return Collections.emptyMap();
-            } else {
-                Map<String, String> assumptions = new HashMap<>();
-                assumptions.put("vk_id", String.valueOf(relatedTable.getVkId()));
-                assumptions.put("vk_domain", relatedTable.getVkDomain());
-                assumptions.put("twitter", relatedTable.getTwitter());
-                assumptions.put("facebook", relatedTable.getFacebook());
-                assumptions.put("instagram", relatedTable.getInstagram());
-                return assumptions;
-            }
+            return getAssumptions(relatedTableRepo::findByVkDomain, id);
+        } else if (socialNetwork.equalsIgnoreCase("twitter")) {
+            return getAssumptions(relatedTableRepo::findByTwitter, id);
         } else {
             return Collections.emptyMap();
+        }
+    }
+
+    private Map<String, String> getAssumptions(Function<String, RelatedTable> finder, String id) {
+        RelatedTable relatedTable = finder.apply(id);
+        if (relatedTable == null) {
+            return Collections.emptyMap();
+        } else {
+            Map<String, String> assumptions = new HashMap<>();
+            assumptions.put("vk_id", String.valueOf(relatedTable.getVkId()));
+            assumptions.put("vk_domain", relatedTable.getVkDomain());
+            assumptions.put("twitter", relatedTable.getTwitter());
+            assumptions.put("facebook", relatedTable.getFacebook());
+            assumptions.put("instagram", relatedTable.getInstagram());
+            return assumptions;
         }
     }
 

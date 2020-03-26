@@ -2,6 +2,7 @@ package com.thorinhood.dataworker.utils.common;
 
 import org.slf4j.Logger;
 
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,6 +43,15 @@ public class MeasureTimeUtil {
         loggerStart(logger, info, count);
         start();
         OUTPUT result = function.apply(input);
+        loggerEnd(logger, info, count);
+        return result;
+    }
+
+    public <INPUT1, INPUT2, OUTPUT> OUTPUT measure(BiFunction<INPUT1, INPUT2, OUTPUT> function, INPUT1 input1,
+                                                   INPUT2 input2, Logger logger, String info, long count) {
+        loggerStart(logger, info, count);
+        start();
+        OUTPUT result = function.apply(input1, input2);
         loggerEnd(logger, info, count);
         return result;
     }
