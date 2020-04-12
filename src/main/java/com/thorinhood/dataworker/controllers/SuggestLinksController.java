@@ -127,7 +127,6 @@ public class SuggestLinksController {
         return sims;
     }
 
-
     private Map<String, String> getAssumptions(Function<String, RelatedTable> finder, String id) {
         RelatedTable relatedTable = finder.apply(id);
         if (relatedTable == null) {

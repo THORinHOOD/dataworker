@@ -26,6 +26,7 @@ repositories {
 dependencies {
 	annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
+	compile 'org.springframework.boot:spring-boot-starter-mustache'
 	compile 'org.springdoc:springdoc-openapi-core:1.1.44'
 	compile 'org.springdoc:springdoc-openapi-ui:1.1.44'
 
@@ -43,21 +44,14 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-text', version: '1.8'
 
 	compile 'org.springframework.boot:spring-boot-starter-aop'
-//	compile group: 'org.springframework.social', name: 'spring-social-config', version: '2.0.0.M4'
-//	implementation 'org.springframework.social:spring-social-web:2.0.0.M4'
 	implementation "org.springframework.social:spring-social-web:+"
-//	implementation 'org.springframework.social:spring-social-config:2.0.0.M4'
-//	compile "org.springframework.social:spring-social-facebook:3.0.0.M3"
+
 	// Social networks API's
 	compile ('com.vk.api:sdk:0.5.12') {
 		exclude group: 'org.asynchttpclient', module: 'async-http-client'
 	}
 	implementation 'org.springframework.social:spring-social-twitter:+'
 	implementation 'org.springframework.social:spring-social-facebook:+'
-
-	//hbase
-//	implementation 'org.apache.hbase.hbase-client:+'
-//	implementation 'org.apache.hbase.hbase:+'
 
 	//cassandra
 	compile 'org.springframework.boot:spring-boot-starter-data-cassandra:+'

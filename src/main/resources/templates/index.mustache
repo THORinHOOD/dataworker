@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:=http://www.w3.org/1999/xhtml>
+<head>
+    {{> meta}}
+    <title>Главная</title>
+</head>
+<body>
+<section class="container">
+    <div class="mx-auto border my-5 py-3 px-3 form">
+        <form action="/api/v1/assumptions" method="get">
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="socialNetork">Социальная сеть</label>
+                    </div>
+                    <select class="custom-select" id="socialNetork" name="socialNetwork">
+                        <option selected>Choose...</option>
+                        <option value="vk">VK</option>
+                        <option value="twitter">Twitter</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id">ID</label>
+                <input class="form-control" id="id" type="text" name="id">
+            </div>
+            <input class="btn btn-primary" type="submit" value="Поиск"/>
+        </form>
+    </div>
+    <table id="table_solutions" class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th>VK</th>
+            <th>Twitter</th>
+            <th>Facebook</th>
+            <th>Instagram</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{#vk}}<a href="https://vk.com/{{vk}}">{{vk}}</a>{{/vk}}</td>
+                <td>{{#twitter}}<a href="https://twitter.com/{{twitter}}">{{twitter}}</a>{{/twitter}}</td>
+                <td>{{#facebook}}<a href="https://www.facebook.com/{{facebook}}">{{facebook}}</a>{{/facebook}}</td>
+                <td>{{#instagram}}<a href="https://www.instagram.com/{{instagram}}">{{instagram}}</a>{{/instagram}}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

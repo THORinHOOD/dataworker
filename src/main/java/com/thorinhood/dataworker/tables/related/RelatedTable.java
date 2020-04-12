@@ -28,12 +28,24 @@ public class RelatedTable {
         return twitter;
     }
 
+    public boolean hasTwittter() {
+        return twitter != null && !twitter.equalsIgnoreCase("null");
+    }
+
     public String getFacebook() {
         return facebook;
     }
 
+    public boolean hasFacebook() {
+        return facebook != null && !facebook.equalsIgnoreCase("null");
+    }
+
     public String getInstagram() {
         return instagram;
+    }
+
+    public boolean hasInstagram() {
+        return instagram != null && !instagram.equalsIgnoreCase("null");
     }
 
     public RelatedTable setUid(UUID uid) {
@@ -45,8 +57,16 @@ public class RelatedTable {
         return vkDomain;
     }
 
+    public boolean hasVkDomain() {
+        return vkDomain != null && !vkDomain.equalsIgnoreCase("null");
+    }
+
     public String getVkId() {
         return vkId;
+    }
+
+    public boolean hasVkId() {
+        return vkId != null && !vkId.equalsIgnoreCase("null");
     }
 
     public RelatedTable setVkDomain(String vkDomain) {
