@@ -41,13 +41,6 @@ public class TwitterConfiguration {
     @Value("${twitter.cache.profiles.count}")
     private Integer cacheProfilesCount;
 
-//    @Bean
-//    public ConnectionFactoryLocator connectionFactoryLocator() {
-//        ConnectionFactoryRegistry registry = new ConnectionFactoryRegistry();
-//        registry.addConnectionFactory(new TwitterConnectionFactory(consumerKey, consumerSecret));
-//        return registry;
-//    }
-
     @Bean
     public TwitterTemplate twitterTemplate() {
         return new TwitterTemplate(consumerKey, consumerSecret, accessToken, accessTokenSecret);

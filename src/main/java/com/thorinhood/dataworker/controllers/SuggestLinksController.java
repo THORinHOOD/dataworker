@@ -1,28 +1,23 @@
 package com.thorinhood.dataworker.controllers;
 
+import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.repositories.TwitterReposBundle;
 import com.thorinhood.dataworker.repositories.VkReposBundle;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
-import com.thorinhood.dataworker.db.VKDBService;
-import com.thorinhood.dataworker.tables.profile.TwitterTable;
-import com.thorinhood.dataworker.utils.common.Formula;
 import com.thorinhood.dataworker.services.unite.SimilarityService;
-import com.thorinhood.dataworker.tables.related.RelatedTable;
+import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
+import com.thorinhood.dataworker.tables.related.RelatedTable;
+import com.thorinhood.dataworker.utils.common.Formula;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.social.twitter.api.Twitter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,8 +76,6 @@ public class SuggestLinksController {
                     vkReposBundle.profiles().save(vkTable);
                 }
             }
-//            table.setVk("null");
-//            twitterReposBundle.profiles().save(table);
         });
         logger.info("End updating twitter...");
     }

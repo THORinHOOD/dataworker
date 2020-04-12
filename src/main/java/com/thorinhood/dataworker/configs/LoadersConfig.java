@@ -57,17 +57,4 @@ public class LoadersConfig {
         return new TwitterUpdater(similarityService, relatedTableRepo, twitterReposBundle);
     }
 
-//    @Bean
-//    public VKLoader vkLoader(VKDBService dbService,
-//                             VKService vkService) {
-//        return new VKLoader(dbService, vkService);
-//    }
-
-//    @Bean
-//    public TwitterLoader twitterLoader(TwitterDBService dbService,
-//                                       TwitterService twitterService) {
-//        return new TwitterLoader(dbService, twitterService);
-//    }
-
-
 }

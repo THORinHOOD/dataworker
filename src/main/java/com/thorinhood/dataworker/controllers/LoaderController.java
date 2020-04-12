@@ -1,13 +1,13 @@
 package com.thorinhood.dataworker.controllers;
 
+import com.thorinhood.dataworker.db.TwitterDBService;
+import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.loaders.Loader;
 import com.thorinhood.dataworker.repositories.TwitterReposBundle;
 import com.thorinhood.dataworker.repositories.VkReposBundle;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.services.social.TwitterService;
 import com.thorinhood.dataworker.services.social.VKService;
-import com.thorinhood.dataworker.db.TwitterDBService;
-import com.thorinhood.dataworker.db.VKDBService;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.utils.common.CallbackExecutor;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
