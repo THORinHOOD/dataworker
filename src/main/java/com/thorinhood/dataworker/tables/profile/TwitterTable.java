@@ -45,6 +45,9 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
     @Transient
     private List<String> friends;
 
+    @Column
+    private String vk = "null";
+
     public TwitterTable setFriends(List<String> friends) {
         this.friends = friends;
         return this;
@@ -142,12 +145,12 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
 
     @Override
     public String vkId() {
-        return null;
+        return vk;
     }
 
     @Override
     public String vkDomain() {
-        return null;
+        return vk;
     }
 
     @Override
@@ -183,6 +186,11 @@ public class TwitterTable implements Profile<String, TwitterFriendsTable> {
     @Override
     public String getId() {
         return screenName;
+    }
+
+    public TwitterTable setVk(String vk) {
+        this.vk = vk;
+        return this;
     }
 
 }

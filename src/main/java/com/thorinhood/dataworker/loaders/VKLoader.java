@@ -41,15 +41,7 @@ public class VKLoader extends CommonLoader<VKDBService, VKTableRepo, VKFriendsTa
             next = super.loadData(next);
             depth--;
         }
-//        VKService vkService = (VKService) service;
-//        for (;;) {
-//            try {
-//                GetResponse response = vkService.getVK().domain("thorinhoodie").execute();
-//                logger.info(response.toString());
-//            } catch (ApiException | ClientException e) {
-//                e.printStackTrace();
-//            }
-//        }
+
     }
 
 }

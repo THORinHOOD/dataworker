@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,6 +23,7 @@ public class TwitterFriendsMaker {
     private final RelatedTableRepo relatedTableRepo;
     private final VKFriendsTableRepo vkFriendsTableRepo;
     private final TwitterFriendsTableRepo twitterFriendsTableRepo;
+    private final ExecutorService executorService;
 
     public TwitterFriendsMaker(TwitterProfilesCache twitterProfilesCache,
                                RelatedTableRepo relatedTableRepo,
@@ -29,11 +32,12 @@ public class TwitterFriendsMaker {
         this.relatedTableRepo = relatedTableRepo;
         this.vkFriendsTableRepo = vkFriendsTableRepo;
         this.twitterFriendsTableRepo = twitterFriendsTableRepo;
+        executorService = Executors.newFixedThreadPool(10);
         twitterProfilesCache.subscribeOnSave(this::linker);
     }
 
     public void linker(Collection<String> ids) {
-        new Thread(() -> {
+        executorService.submit(() -> {
             Stream<RelatedTable> relatedTableList = convertToRelated(ids);
             Map<RelatedTable, List<String>> vkFriends = getVkFriends(relatedTableList);
             vkFriends.forEach((relatedTable, vkFriendsDomains) -> {
@@ -41,7 +45,7 @@ public class TwitterFriendsMaker {
                 twitters.forEach(twitter -> twitterFriendsTableRepo.save(new TwitterFriendsTable()
                         .setKey(relatedTable.getTwitter(), twitter)));
             });
-        }).start();
+        });
     }
 
     private List<String> getVkToTwitter(List<String> vkDomains) {

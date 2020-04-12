@@ -17,6 +17,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -52,17 +53,21 @@ public class Loader {
         measureTimeUtil = new MeasureTimeUtil();
     }
 
-    public void load(List<String> vkIds, int depth) {
+    public void loadByVk(List<String> vkIds, int depth) {
         vkIds = vkIds.stream()
             .filter(x -> !vkProfilesCache.contains(x))
             .collect(Collectors.toList());
         while (depth-- > 0) {
-            vkIds = measureTimeUtil.measure(this::loadNext, vkIds, logger, "loading vk depth " + (depth + 1),
+            vkIds = measureTimeUtil.measure(this::loadByVkNext, vkIds, logger, "loading vk depth " + (depth + 1),
                     vkIds.size());
         }
     }
 
-    private List<String> loadNext(List<String> ids) {
+    public void loadVkPosts(Collection<String> vkDomain) {
+        vkdbService.savePosts(vkService.getUsersPosts(vkDomain));
+    }
+
+    private List<String> loadByVkNext(List<String> ids) {
         return vkProfilesCache.filter(Lists.partition(ids, 25).stream())
             .flatMap(partition -> {
                 List<VKTable> vkProfiles = measureTimeUtil.measure(vkService::getUsersInfo, partition, logger,

@@ -15,4 +15,7 @@ public interface VKFriendsTableRepo extends CassandraRepository<VKFriendsTable, 
     @Query("SELECT * FROM vk_friends WHERE first = :first")
     List<VKFriendsTable> searchByFirst(@Param("first") String first);
 
+    @Query("SELECT * FROM vk_friends WHERE second = :second")
+    List<VKFriendsTable> searchBySecond(@Param("second") String second);
+
 }

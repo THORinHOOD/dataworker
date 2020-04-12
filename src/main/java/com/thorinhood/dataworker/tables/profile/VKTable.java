@@ -60,8 +60,8 @@ public class VKTable implements Profile<String, VKFriendsTable> {
     @Transient
     private String facebook;
 
-    @Transient
-    private String twitter;
+    @Column
+    private String twitter = "null";
 
     @Transient
     private String instagram;
