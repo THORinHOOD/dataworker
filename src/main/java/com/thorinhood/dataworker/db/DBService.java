@@ -16,13 +16,8 @@ import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,7 +50,6 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
     protected final String needFriendsTable;
     protected final Class<ID> idClass;
     protected final RelatedTableRepo relatedTableRepo;
-    protected final JdbcTemplate postgresJdbc;
     protected final FRIENDS_REPO friendsRepo;
     protected final List<Consumer<Collection<String>>> saveProfilesEvents;
     protected final ExecutorService friendsExecutorService;
@@ -72,7 +66,6 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
                      String needFriendsTable,
                      Class<ID> idClass,
                      RelatedTableRepo relatedTableRepo,
-                     JdbcTemplate postgresJdbc,
                      Class dbServiceClass,
                      int friendsThreads,
                      int postsThreads) {
@@ -83,7 +76,6 @@ public abstract class DBService<TABLE_REPO extends CassandraRepository<TABLE, ID
         this.idClass = idClass;
         this.relatedTableRepo = relatedTableRepo;
         logger = LoggerFactory.getLogger(dbServiceClass);
-        this.postgresJdbc = postgresJdbc;
         this.friendsRepo = friendsRepo;
         this.postsRepo = postsRepo;
         this.saveProfilesEvents = new ArrayList<>();

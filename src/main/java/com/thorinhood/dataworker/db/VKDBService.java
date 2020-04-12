@@ -18,7 +18,6 @@ public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKPo
                        VKPostsTableRepo vkPostsTableRepo,
                        CassandraTemplate cassandraTemplate,
                        RelatedTableRepo relatedTableRepo,
-                       JdbcTemplate postgresJdbc,
                        int dbServiceFriendsThreads,
                        int dbServicePostsThreads) {
         super(
@@ -30,7 +29,6 @@ public class VKDBService extends DBService<VKTableRepo, VKFriendsTableRepo, VKPo
             "vk_need_friends",
             String.class,
             relatedTableRepo,
-            postgresJdbc,
             VKDBService.class,
             dbServiceFriendsThreads,
             dbServicePostsThreads

@@ -72,15 +72,13 @@ public class TwitterConfiguration {
                                              TwitterFriendsTableRepo twitterFriendsTableRepo,
                                              TwitterPostsTableRepo twitterPostsTableRepo,
                                              CassandraTemplate cassandraTemplate,
-                                             RelatedTableRepo relatedTableRepo,
-                                             JdbcTemplate postgresJdbc) {
+                                             RelatedTableRepo relatedTableRepo) {
         return new TwitterDBService(
                 twitterTableRepo,
                 twitterFriendsTableRepo,
                 twitterPostsTableRepo,
                 cassandraTemplate,
                 relatedTableRepo,
-                postgresJdbc,
                 dbServiceFriendsThreadsCount,
                 dbServicePostsThreadsCount
         );

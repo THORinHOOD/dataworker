@@ -64,15 +64,13 @@ public class VKConfiguration {
                                    VKFriendsTableRepo vkFriendsTableRepo,
                                    VKPostsTableRepo vkPostsTableRepo,
                                    CassandraTemplate cassandraTemplate,
-                                   RelatedTableRepo relatedTableRepo,
-                                   JdbcTemplate postgresJdbc) {
+                                   RelatedTableRepo relatedTableRepo) {
         return new VKDBService(
                 vkTableRepo,
                 vkFriendsTableRepo,
                 vkPostsTableRepo,
                 cassandraTemplate,
                 relatedTableRepo,
-                postgresJdbc,
                 vkDBFriendsServiceThreadsCount,
                 vkDBPostsServiceThreadsCount
         );
