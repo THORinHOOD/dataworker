@@ -9,6 +9,7 @@ import com.thorinhood.dataworker.utils.common.Formula;
 import com.thorinhood.dataworker.services.unite.SimilarityService;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.social.twitter.api.Twitter;
@@ -88,7 +89,14 @@ public class SuggestLinksController {
 
     @GetMapping("/match")
     public boolean tryMatch(@RequestParam String vkDomain) {
-        return similarityService.match(vkDomain);
+        if (StringUtils.isBlank(vkDomain)) {
+            return false;
+        }
+        VKTable vkTable = vkReposBundle.profiles().findByDomain(vkDomain);
+        if (vkTable == null) {
+            return false;
+        }
+        return similarityService.match(vkTable);
     }
 
     @GetMapping("/similarity")
