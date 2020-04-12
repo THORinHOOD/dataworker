@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.utils.vk;
+package com.thorinhood.dataworker.utils.common;
 
 import com.thorinhood.dataworker.tables.profile.VKTable;
 
@@ -10,16 +10,23 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class VKDataUtil {
+public class LinksUtil {
 
     private final static String TWITTER = "://twitter.com/";
     private final static String FACEBOOK = "://www.facebook.com/";
     private final static String INSTAGRAM = "://instagram.com/";
 
+    private static final Map<String, String> patterns = Map.of(
+            "vk", "http(s?)://vk.com/(.*)",
+            "twitter", "http(s?)://twitter.com/(.*)",
+            "facebook", "http(s?)://facebook.com/(.*)",
+            "instagram", "http(s?)://instagram.com/(.*)"
+    );
+
     private final static Collection<BiConsumer<Map<String, String>, VKTable>> assumptionsSetters = Arrays.asList(
-            VKDataUtil::getFacebook,
-            VKDataUtil::getInstagram,
-            VKDataUtil::getTwitter
+            LinksUtil::getFacebook,
+            LinksUtil::getInstagram,
+            LinksUtil::getTwitter
     );
 
     public static void extractLinks(VKTable vkTable) {
@@ -31,16 +38,24 @@ public class VKDataUtil {
         String[] lines = about.split("\n");
         for (String line : lines) {
             if (line.contains(TWITTER)) {
-                extractLink(vkTable, "http(s?)://twitter.com/(.*)", 2, VKTable::getTwitter,
-                        VKTable::setTwitter, line);
+                extractLink(vkTable, patterns.get("twitter"), 2, VKTable::getTwitter,
+                    VKTable::setTwitter, line);
             } else if (line.contains(FACEBOOK)) {
-                extractLink(vkTable, "http(s?)://www.facebook.com/(.*)", 2, VKTable::getFacebook,
-                        VKTable::setFacebook, line);
+                extractLink(vkTable, patterns.get("facebook"), 2, VKTable::getFacebook,
+                    VKTable::setFacebook, line);
             } else if (line.contains(INSTAGRAM)) {
-                extractLink(vkTable, "http(s?)://instagram.com/(.*)", 2, VKTable::getInstagram,
-                        VKTable::setInstagram, line);
+                extractLink(vkTable, patterns.get("instagram"), 2, VKTable::getInstagram,
+                    VKTable::setInstagram, line);
             }
         }
+    }
+
+    public static String extractId(String socialNetwork, String link) {
+        if (socialNetwork == null || socialNetwork.isBlank()) {
+            return null;
+        }
+        String pattern = patterns.getOrDefault(socialNetwork.toLowerCase(), null);
+        return pattern == null ? null : extractIdLink(pattern, 2, link);
     }
 
     public static void getAllAssumptions(Map<String, String> assumptions, VKTable vkTable) {

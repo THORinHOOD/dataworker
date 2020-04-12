@@ -2,13 +2,12 @@ package com.thorinhood.dataworker.controllers;
 
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
+import com.thorinhood.dataworker.utils.common.LinksUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -28,13 +27,36 @@ public class ViewController {
     }
 
     @GetMapping("/assumptions")
-    public String getAssumptions(@RequestParam String socialNetwork,
-                                 @RequestParam String id,
+    public String getAssumptions(@RequestParam String link,
                                  Map<String, Object> model) {
-        if (socialNetwork.equalsIgnoreCase("vk")) {
-            getAssumptions(relatedTableRepo::findByVkDomain, id, model);
-        } else if (socialNetwork.equalsIgnoreCase("twitter")) {
-            getAssumptions(relatedTableRepo::findByTwitter, id, model);
+        if (link == null || link.isBlank()) {
+            return "index";
+        }
+        String socialNetwork = "";
+        link = link.toLowerCase();
+        if (link.contains("vk")) {
+            socialNetwork = "vk";
+        } else if (link.contains("twitter")) {
+            socialNetwork = "twitter";
+        } else if (link.contains("instagram")) {
+            socialNetwork = "instagram";
+        } else if (link.contains("facebook")) {
+            socialNetwork = "facebook";
+        }
+        if (socialNetwork.isBlank()) {
+            return "index";
+        }
+        String id = LinksUtil.extractId(socialNetwork, link);
+        if (id != null && !id.isBlank()) {
+            if (socialNetwork.equalsIgnoreCase("vk")) {
+                getAssumptions(relatedTableRepo::findByVkDomain, id, model);
+            } else if (socialNetwork.equalsIgnoreCase("twitter")) {
+                getAssumptions(relatedTableRepo::findByTwitter, id, model);
+            } else if (socialNetwork.equalsIgnoreCase("instagram")) {
+                getAssumptions(relatedTableRepo::findByInstagram, id, model);
+            } else if (socialNetwork.equalsIgnoreCase("facebook")) {
+                getAssumptions(relatedTableRepo::findByFacebook, id, model);
+            }
         }
         return "index";
     }

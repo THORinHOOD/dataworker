@@ -5,7 +5,7 @@ import com.thorinhood.dataworker.tables.friends.VKFriendsTable;
 import com.thorinhood.dataworker.tables.posts.VKPostsTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
 import com.thorinhood.dataworker.utils.common.FieldExtractor;
-import com.thorinhood.dataworker.utils.vk.VKDataUtil;
+import com.thorinhood.dataworker.utils.common.LinksUtil;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.ServiceActor;
@@ -182,7 +182,7 @@ public class VKService extends SocialService<VKTable, VKPostsTable, String, VKFr
                 })
                 .collect(Collectors.toMap(VKTable::getId, Function.identity()));
 
-        result.values().forEach(VKDataUtil::extractLinks);
+        result.values().forEach(LinksUtil::extractLinks);
         vkFriendsService.getFriends(new ArrayList<>(result.keySet()))
                 .forEach((id, friends) -> result.get(id).setFriends(friends));
         return new ArrayList<>(result.values());
