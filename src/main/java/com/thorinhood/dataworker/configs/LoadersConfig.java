@@ -42,19 +42,19 @@ public class LoadersConfig {
         );
     }
 
-    @Bean
-    public VkUpdater vkUpdater(SimilarityService similarityService,
-                               RelatedTableRepo relatedTableRepo,
-                               VkReposBundle vkReposBundle,
-                               TwitterReposBundle twitterReposBundle) {
-        return new VkUpdater(similarityService, relatedTableRepo, vkReposBundle, twitterReposBundle);
-    }
-
-    @Bean
-    public TwitterUpdater twitterUpdater(SimilarityService similarityService,
-                                         RelatedTableRepo relatedTableRepo,
-                                         TwitterReposBundle twitterReposBundle) {
-        return new TwitterUpdater(similarityService, relatedTableRepo, twitterReposBundle);
-    }
+//    @Bean
+//    public VkUpdater vkUpdater(SimilarityService similarityService,
+//                               RelatedTableRepo relatedTableRepo,
+//                               VkReposBundle vkReposBundle,
+//                               TwitterReposBundle twitterReposBundle) {
+//        return new VkUpdater(similarityService, relatedTableRepo, vkReposBundle, twitterReposBundle);
+//    }
+//
+//    @Bean
+//    public TwitterUpdater twitterUpdater(SimilarityService similarityService,
+//                                         RelatedTableRepo relatedTableRepo,
+//                                         TwitterReposBundle twitterReposBundle) {
+//        return new TwitterUpdater(similarityService, relatedTableRepo, twitterReposBundle);
+//    }
 
 }

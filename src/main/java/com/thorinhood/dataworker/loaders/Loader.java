@@ -53,11 +53,15 @@ public class Loader {
         measureTimeUtil = new MeasureTimeUtil();
     }
 
+    public void loadByTwitter(List<String> twitterIds, int depth) {
+        while (depth-- > 0 && !CollectionUtils.isEmpty(twitterIds)) {
+            twitterIds = measureTimeUtil.measure(this::loadByTwitterNext, twitterIds, logger,
+                "loading twitter depth " + (depth + 1), twitterIds.size());
+        }
+    }
+
     public void loadByVk(List<String> vkIds, int depth) {
-        vkIds = vkIds.stream()
-            .filter(x -> !vkProfilesCache.contains(x))
-            .collect(Collectors.toList());
-        while (depth-- > 0) {
+        while (depth-- > 0 && !CollectionUtils.isEmpty(vkIds)) {
             vkIds = measureTimeUtil.measure(this::loadByVkNext, vkIds, logger, "loading vk depth " + (depth + 1),
                     vkIds.size());
         }
@@ -65,6 +69,40 @@ public class Loader {
 
     public void loadVkPosts(Collection<String> vkDomain) {
         vkdbService.savePosts(vkService.getUsersPosts(vkDomain));
+    }
+
+    public void loadTwitterPosts(Collection<String> twitterIds) {
+        twitterDBService.savePosts(twitterService.getUsersPosts(twitterIds));
+    }
+
+    private List<String> loadByTwitterNext(List<String> ids) {
+        return twitterProfilesCache.filter(Lists.partition(ids, 25).stream())
+                .flatMap(partition -> {
+                    List<TwitterTable> twitterProfiles = measureTimeUtil.measure(twitterService::getUsersInfo,
+                            partition, logger, "twitter profiles", partition.size());
+                    twitterDBService.saveProfiles(twitterProfiles);
+                    twitterDBService.savePosts(loadTweets(twitterProfiles));
+                    List<String> friends = twitterProfiles.stream()
+                            .flatMap(x -> {
+                                if (CollectionUtils.isNotEmpty(x.getLinked())) {
+                                    return x.getFriends().stream();
+                                }
+                                return Stream.empty();
+                            })
+                            .collect(Collectors.toList());
+                    List<String> vkIds = twitterProfiles.stream()
+                            .map(TwitterTable::vkDomain)
+                            .filter(Objects::nonNull)
+                            .filter(x -> !"null".equalsIgnoreCase(x))
+                            .filter(x -> !vkProfilesCache.contains(x))
+                            .collect(Collectors.toList());
+                    List<VKTable> vkProfiles = measureTimeUtil.measure(vkService::getUsersInfo, vkIds,
+                            logger, "vk profiles", vkIds.size());
+                    vkdbService.saveProfiles(vkProfiles);
+                    vkdbService.savePosts(loadVKPosts(vkProfiles));
+                    return friends.stream();
+                })
+                .collect(Collectors.toList());
     }
 
     private List<String> loadByVkNext(List<String> ids) {

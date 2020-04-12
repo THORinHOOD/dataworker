@@ -38,6 +38,7 @@ public class LoaderController {
     private final TwitterReposBundle twitterReposBundle;
     private final VkReposBundle vkReposBundle;
     private final RelatedTableRepo relatedTableRepo;
+    private CallbackExecutor callbackExecutor;
 
     public LoaderController(Loader loader,
                             VKService vkService,
@@ -55,6 +56,7 @@ public class LoaderController {
         this.twitterReposBundle = twitterReposBundle;
         this.vkReposBundle = vkReposBundle;
         this.relatedTableRepo = relatedTableRepo;
+        callbackExecutor = new CallbackExecutor();
     }
 
     @GetMapping("/truncate")
@@ -69,7 +71,7 @@ public class LoaderController {
     }
 
     @GetMapping("/vk/load/posts")
-    public void loadPosts(@RequestParam List<String> ids) {
+    public void loadVkPosts(@RequestParam List<String> ids) {
         if (!executing) {
             executing = true;
             loader.loadVkPosts(ids);
@@ -77,29 +79,55 @@ public class LoaderController {
         }
     }
 
-    @GetMapping("/vk/load/all/posts")
-    public void loadAllPosts() {
+    @GetMapping("/twitter/load/posts")
+    public void loadTwitterPosts(@RequestParam List<String> ids) {
         if (!executing) {
             executing = true;
-            List<String> vkIds = twitterReposBundle.profiles().findAll().stream()
-                    .map(TwitterTable::getScreenName)
-                    .filter(Objects::nonNull)
-                    .map(relatedTableRepo::findByTwitter)
-                    .filter(Objects::nonNull)
-                    .map(RelatedTable::getVkDomain)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            loader.loadVkPosts(vkIds);
+            loader.loadTwitterPosts(ids);
             executing = false;
         }
     }
 
-    @GetMapping("/vk/start")
-    public void start(@RequestParam List<String> ids,
-                      @RequestParam int depth) {
+    @GetMapping("/stop")
+    public void stop() {
+        if (executing) {
+            callbackExecutor.stop();
+            executing = false;
+        }
+    }
+
+    @GetMapping("/twitter/start")
+    public void startTwitter(@RequestParam List<String> ids,
+                             @RequestParam int depth) {
         if (!executing) {
             executing = true;
-            new CallbackExecutor().execute(new CallbackRunnable() {
+            callbackExecutor.execute(new CallbackRunnable() {
+                @Override
+                public void callback() {
+                    logger.info("Loader ended");
+                    executing = false;
+                }
+
+                @Override
+                public void error(Exception e) {
+                    logger.error("Loader failed with exception", e);
+                    executing = false;
+                }
+
+                @Override
+                public void run() {
+                    loader.loadByTwitter(ids, depth);
+                }
+            });
+        }
+    }
+
+    @GetMapping("/vk/start")
+    public void startVK(@RequestParam List<String> ids,
+                        @RequestParam int depth) {
+        if (!executing) {
+            executing = true;
+            callbackExecutor.execute(new CallbackRunnable() {
                 @Override
                 public void callback() {
                     logger.info("Loader ended");
