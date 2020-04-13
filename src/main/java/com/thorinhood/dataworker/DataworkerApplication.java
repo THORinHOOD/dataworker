@@ -8,8 +8,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationPropertiesScan("com.thorinhood.dataworker")
 public class DataworkerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DataworkerApplication.class, args);
-	}
+    @SuppressWarnings("shit")
+    public static void main(String[] args) {
+    	SpringApplication.run(DataworkerApplication.class, args);
+    }
 
 }
