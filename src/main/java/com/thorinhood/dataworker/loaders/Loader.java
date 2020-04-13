@@ -12,7 +12,7 @@ import com.thorinhood.dataworker.tables.posts.TwitterPostsTable;
 import com.thorinhood.dataworker.tables.posts.VKPostsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
-import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
+import com.thorinhood.dataworker.utils.MeasureTimeUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

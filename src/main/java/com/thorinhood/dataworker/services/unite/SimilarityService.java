@@ -13,7 +13,7 @@ import com.thorinhood.dataworker.tables.posts.VKPostsTable;
 import com.thorinhood.dataworker.tables.profile.TwitterTable;
 import com.thorinhood.dataworker.tables.profile.VKTable;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
-import com.thorinhood.dataworker.utils.common.Formula;
+import com.thorinhood.dataworker.utils.Formula;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

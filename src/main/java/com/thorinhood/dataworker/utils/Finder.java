@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.utils.common;
+package com.thorinhood.dataworker.utils;
 
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.related.RelatedTable;

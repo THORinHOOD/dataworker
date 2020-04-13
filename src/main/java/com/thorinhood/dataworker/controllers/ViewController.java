@@ -2,7 +2,7 @@ package com.thorinhood.dataworker.controllers;
 
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.tables.related.RelatedTable;
-import com.thorinhood.dataworker.utils.common.LinksUtil;
+import com.thorinhood.dataworker.utils.LinksUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

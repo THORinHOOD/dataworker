@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.utils.common;
+package com.thorinhood.dataworker.utils;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;

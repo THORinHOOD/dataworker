@@ -1,4 +1,4 @@
-package com.thorinhood.dataworker.utils.common;
+package com.thorinhood.dataworker.utils;
 
 public interface CallbackRunnable extends Runnable {
     public void callback();

@@ -8,10 +8,8 @@ import com.thorinhood.dataworker.repositories.VkReposBundle;
 import com.thorinhood.dataworker.repositories.related.RelatedTableRepo;
 import com.thorinhood.dataworker.services.social.TwitterService;
 import com.thorinhood.dataworker.services.social.VKService;
-import com.thorinhood.dataworker.tables.profile.TwitterTable;
-import com.thorinhood.dataworker.tables.related.RelatedTable;
-import com.thorinhood.dataworker.utils.common.CallbackExecutor;
-import com.thorinhood.dataworker.utils.common.CallbackRunnable;
+import com.thorinhood.dataworker.utils.CallbackExecutor;
+import com.thorinhood.dataworker.utils.CallbackRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/loader")

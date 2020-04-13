@@ -1,7 +1,7 @@
 package com.thorinhood.dataworker.cache;
 
-import com.thorinhood.dataworker.utils.common.MeasureTimeUtil;
-import com.thorinhood.dataworker.utils.common.SetBlockingQueue;
+import com.thorinhood.dataworker.utils.MeasureTimeUtil;
+import com.thorinhood.dataworker.utils.SetBlockingQueue;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 
